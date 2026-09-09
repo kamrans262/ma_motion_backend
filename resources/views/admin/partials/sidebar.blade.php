@@ -33,9 +33,8 @@
             <span>Makers</span>
         </a>
 
-        @foreach (['Artwork', 'Shows'] as $item)
-            <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true"><span class="ma-nav__icon" aria-hidden="true">◇</span><span>{{ $item }}</span><span class="ma-nav__soon">Soon</span></span>
-        @endforeach
+        <a class="ma-nav__item {{ request()->routeIs('admin.artworks.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.artworks.index') }}" @if(request()->routeIs('admin.artworks.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Artwork</span></a>
+        <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true"><span class="ma-nav__icon" aria-hidden="true">◇</span><span>Shows</span><span class="ma-nav__soon">Soon</span></span>
         <a class="ma-nav__item {{ request()->routeIs('admin.types.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.types.index') }}" @if(request()->routeIs('admin.types.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Types</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.styles.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.styles.index') }}" @if(request()->routeIs('admin.styles.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Styles</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.locations.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.locations.index') }}" @if(request()->routeIs('admin.locations.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Locations</span></a>
