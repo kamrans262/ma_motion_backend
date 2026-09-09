@@ -1,5 +1,13 @@
 <?php
 
+use App\Features\Admin\Artworks\Http\Controllers\DestroyController as ArtworkDestroyController;
+use App\Features\Admin\Artworks\Http\Controllers\DestroyMediaController as ArtworkDestroyMediaController;
+use App\Features\Admin\Artworks\Http\Controllers\IndexController as ArtworkIndexController;
+use App\Features\Admin\Artworks\Http\Controllers\ModerateController as ArtworkModerateController;
+use App\Features\Admin\Artworks\Http\Controllers\SetPrimaryMediaController as ArtworkSetPrimaryMediaController;
+use App\Features\Admin\Artworks\Http\Controllers\ShowController as ArtworkShowController;
+use App\Features\Admin\Artworks\Http\Controllers\ToggleVisibilityController as ArtworkToggleVisibilityController;
+use App\Features\Admin\Artworks\Http\Controllers\UpdateController as ArtworkUpdateController;
 use App\Features\Admin\Http\Controllers\Auth\LoginController;
 use App\Features\Admin\Http\Controllers\Auth\LogoutController;
 use App\Features\Admin\Http\Controllers\DashboardController;
@@ -48,6 +56,17 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/', MakerIndexController::class)->name('index');
             Route::get('/{maker}', MakerShowController::class)->whereNumber('maker')->name('show');
             Route::put('/{maker}', MakerUpdateController::class)->whereNumber('maker')->name('update');
+        });
+
+        Route::prefix('artworks')->name('artworks.')->group(function (): void {
+            Route::get('/', ArtworkIndexController::class)->name('index');
+            Route::get('/{artwork}', ArtworkShowController::class)->whereNumber('artwork')->name('show');
+            Route::put('/{artwork}', ArtworkUpdateController::class)->whereNumber('artwork')->name('update');
+            Route::patch('/{artwork}/moderation', ArtworkModerateController::class)->whereNumber('artwork')->name('moderate');
+            Route::patch('/{artwork}/visibility', ArtworkToggleVisibilityController::class)->whereNumber('artwork')->name('toggle-visibility');
+            Route::patch('/{artwork}/media/{media}/primary', ArtworkSetPrimaryMediaController::class)->whereNumber(['artwork', 'media'])->name('media.primary');
+            Route::delete('/{artwork}/media/{media}', ArtworkDestroyMediaController::class)->whereNumber(['artwork', 'media'])->name('media.destroy');
+            Route::delete('/{artwork}', ArtworkDestroyController::class)->whereNumber('artwork')->name('destroy');
         });
 
         Route::prefix('types')->name('types.')->group(function (): void {

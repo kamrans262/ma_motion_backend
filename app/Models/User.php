@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Features\Artworks\Models\Artwork;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Auth\Models\SocialAccount;
@@ -23,9 +24,6 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -62,5 +60,11 @@ class User extends Authenticatable
     public function makerProfile(): HasOne
     {
         return $this->hasOne(MakerProfile::class);
+    }
+
+    /** @return HasMany<Artwork, $this> */
+    public function artworks(): HasMany
+    {
+        return $this->hasMany(Artwork::class, 'maker_id');
     }
 }

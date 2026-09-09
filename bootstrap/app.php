@@ -27,6 +27,12 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Features/Admin/Console',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(
+            static fn (Request $request): ?string => $request->is('admin/*')
+                ? route('admin.login')
+                : null,
+        );
+
         $middleware->alias([
             'account.active' => EnsureAccountIsActive::class,
             'role' => RequireRole::class,

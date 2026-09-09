@@ -2,6 +2,7 @@
 
 namespace App\Features\Locations\Models;
 
+use App\Features\Artworks\Models\Artwork;
 use App\Features\Makers\Models\MakerProfile;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -34,5 +35,11 @@ final class Location extends Model
     public function makerProfiles(): HasMany
     {
         return $this->hasMany(MakerProfile::class);
+    }
+
+    /** @return HasMany<Artwork, $this> */
+    public function artworks(): HasMany
+    {
+        return $this->hasMany(Artwork::class);
     }
 }
