@@ -7,4 +7,6 @@ Route::prefix('v1')
     ->name('api.v1.')
     ->group(function (): void {
         Route::get('/health', HealthController::class)->name('health');
+
+        require __DIR__.'/api/v1/auth.php';
     });
