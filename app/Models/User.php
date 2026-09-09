@@ -5,11 +5,13 @@ namespace App\Models;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Auth\Models\SocialAccount;
+use App\Features\Makers\Models\MakerProfile;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -22,8 +24,6 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -56,5 +56,11 @@ class User extends Authenticatable
     public function socialAccounts(): HasMany
     {
         return $this->hasMany(SocialAccount::class);
+    }
+
+    /** @return HasOne<MakerProfile, $this> */
+    public function makerProfile(): HasOne
+    {
+        return $this->hasOne(MakerProfile::class);
     }
 }

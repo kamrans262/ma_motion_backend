@@ -9,7 +9,7 @@ class AdminUiContractTest extends TestCase
 {
     public function test_admin_css_encodes_ma_motion_design_and_responsive_contract(): void
     {
-        $css = File::get(public_path('admin/css/admin.css'));
+        $css = File::get(public_path('assets/admin/css/admin.css'));
 
         $this->assertStringContainsString('--ma-bg: #062317;', $css);
         $this->assertStringContainsString('--ma-purple: #8b3dff;', $css);
@@ -28,6 +28,6 @@ class AdminUiContractTest extends TestCase
         $this->assertStringContainsString('width=device-width, initial-scale=1', $html);
         $this->assertStringContainsString('Skip to content', $html);
         $this->assertStringContainsString('fonts.googleapis.com/css2?family=Instrument+Sans', $html);
-        $this->assertStringContainsString('/admin/css/admin.css', $html);
+        $this->assertStringContainsString('/assets/admin/css/admin.css', $html);
     }
 }
