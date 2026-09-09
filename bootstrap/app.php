@@ -1,5 +1,9 @@
 <?php
 
+use App\Features\Auth\Exceptions\InactiveAccountException;
+use App\Features\Auth\Exceptions\InvalidCredentialsException;
+use App\Features\Auth\Http\Middleware\EnsureAccountIsActive;
+use App\Features\Auth\Http\Middleware\RequireRole;
 use App\Support\Api\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -19,7 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global middleware aliases and groups will be registered here as needed.
+        $middleware->alias([
+            'account.active' => EnsureAccountIsActive::class,
+            'role' => RequireRole::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $isApiRequest = static fn (Request $request): bool => $request->is('api/*');
@@ -37,6 +44,28 @@ return Application::configure(basePath: dirname(__DIR__))
                 message: 'The given data was invalid.',
                 status: 422,
                 errors: $exception->errors(),
+            );
+        });
+
+        $exceptions->render(function (InvalidCredentialsException $exception, Request $request) use ($isApiRequest) {
+            if (! $isApiRequest($request)) {
+                return null;
+            }
+
+            return ApiResponse::error(
+                message: $exception->getMessage(),
+                status: 401,
+            );
+        });
+
+        $exceptions->render(function (InactiveAccountException $exception, Request $request) use ($isApiRequest) {
+            if (! $isApiRequest($request)) {
+                return null;
+            }
+
+            return ApiResponse::error(
+                message: $exception->getMessage(),
+                status: 403,
             );
         });
 
@@ -80,6 +109,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $status = $exception->getStatusCode();
             $message = match ($status) {
+                401 => 'Unauthenticated.',
+                403 => 'You are not authorized to perform this action.',
                 404 => 'API endpoint not found.',
                 405 => 'HTTP method not allowed for this endpoint.',
                 429 => 'Too many requests. Please try again later.',
