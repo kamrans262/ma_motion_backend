@@ -1,5 +1,6 @@
 <?php
 
+use App\Features\Admin\Http\Middleware\EnsureAdminPanelAccess;
 use App\Features\Auth\Exceptions\InactiveAccountException;
 use App\Features\Auth\Exceptions\InvalidCredentialsException;
 use App\Features\Auth\Http\Middleware\EnsureAccountIsActive;
@@ -22,10 +23,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        __DIR__.'/../app/Features/Admin/Console',
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'account.active' => EnsureAccountIsActive::class,
             'role' => RequireRole::class,
+            'admin.access' => EnsureAdminPanelAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
