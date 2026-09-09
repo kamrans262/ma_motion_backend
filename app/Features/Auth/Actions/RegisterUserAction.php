@@ -16,13 +16,19 @@ final class RegisterUserAction
     public function execute(array $data): array
     {
         return DB::transaction(function () use ($data): array {
+            $role = UserRole::from($data['role']);
+
             $user = User::query()->create([
                 'name' => trim($data['name']),
                 'email' => $data['email'],
                 'password' => $data['password'],
-                'role' => UserRole::from($data['role']),
+                'role' => $role,
                 'status' => UserStatus::Active,
             ]);
+
+            if ($role === UserRole::Maker) {
+                $user->makerProfile()->create();
+            }
 
             $deviceName = trim((string) ($data['device_name'] ?? ''));
 

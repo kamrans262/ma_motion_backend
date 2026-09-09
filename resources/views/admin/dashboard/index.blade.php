@@ -52,7 +52,7 @@
                         @foreach ($recent_users as $user)
                             <tr>
                                 <td data-label="User">
-                                    <strong>{{ $user->name }}</strong>
+                                    <strong><a class="ma-text-link" href="{{ route('admin.users.show', $user) }}">{{ $user->name }}</a></strong>
                                     <small>{{ $user->email }}</small>
                                 </td>
                                 <td data-label="Role">{{ ucfirst($user->role->value) }}</td>
@@ -85,8 +85,8 @@
             <li><span>✓</span> Account dashboard metrics</li>
         </ul>
         <div class="ma-callout">
-            <strong>Next module</strong>
-            <p>Users and Maker management will plug into this layout without introducing another design system.</p>
+            <strong>Users & Makers enabled</strong>
+            <p>User and Maker management now use this shared responsive design system. Types, Styles and structured Location management are next.</p>
         </div>
     </aside>
 </section>

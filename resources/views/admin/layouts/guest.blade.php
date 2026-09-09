@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('admin/css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/admin.css') }}">
 </head>
 <body class="ma-admin ma-admin--guest">
     <a class="ma-skip-link" href="#main-content">Skip to content</a>

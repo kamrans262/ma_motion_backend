@@ -12,13 +12,28 @@
 
     <nav class="ma-nav">
         <p class="ma-nav__label">Overview</p>
-        <a class="ma-nav__item ma-nav__item--active" href="{{ route('admin.dashboard') }}" aria-current="page">
+        <a class="ma-nav__item {{ request()->routeIs('admin.dashboard') ? 'ma-nav__item--active' : '' }}"
+           href="{{ route('admin.dashboard') }}"
+           @if(request()->routeIs('admin.dashboard')) aria-current="page" @endif>
             <span class="ma-nav__icon" aria-hidden="true">◆</span>
             <span>Dashboard</span>
         </a>
 
         <p class="ma-nav__label">Platform</p>
-        @foreach (['Users', 'Makers', 'Artwork', 'Shows', 'Categories & Styles', 'Locations', 'Featured Maker', 'Notifications'] as $item)
+        <a class="ma-nav__item {{ request()->routeIs('admin.users.*') ? 'ma-nav__item--active' : '' }}"
+           href="{{ route('admin.users.index') }}"
+           @if(request()->routeIs('admin.users.*')) aria-current="page" @endif>
+            <span class="ma-nav__icon" aria-hidden="true">◆</span>
+            <span>Users</span>
+        </a>
+        <a class="ma-nav__item {{ request()->routeIs('admin.makers.*') ? 'ma-nav__item--active' : '' }}"
+           href="{{ route('admin.makers.index') }}"
+           @if(request()->routeIs('admin.makers.*')) aria-current="page" @endif>
+            <span class="ma-nav__icon" aria-hidden="true">◆</span>
+            <span>Makers</span>
+        </a>
+
+        @foreach (['Artwork', 'Shows', 'Categories & Styles', 'Locations', 'Featured Maker', 'Notifications'] as $item)
             <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true">
                 <span class="ma-nav__icon" aria-hidden="true">◇</span>
                 <span>{{ $item }}</span>

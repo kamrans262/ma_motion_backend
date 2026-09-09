@@ -29,7 +29,7 @@ The visual system follows the approved MA Motion mobile reference:
 - Responsive sidebar and tables from compact mobile through large desktop
 - Accessible focus states, skip link and reduced-motion support
 
-Tokens are centralized in `public/admin/css/admin.css`. Future admin modules should reuse this design system instead of adding competing styles.
+Tokens are centralized in `public/assets/admin/css/admin.css`. Future admin modules should reuse this design system instead of adding competing styles.
 
 ## Local administrator creation
 
