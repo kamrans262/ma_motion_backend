@@ -531,7 +531,7 @@ h1, h2, h3, h4, .ma-brand strong, .ma-button, .ma-topbar__title {
 .ma-field option { background: var(--ma-bg-deep); color: var(--ma-text); }
 .ma-field__hint { color: var(--ma-muted); font-size: 12px; }
 .ma-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ma-space-4); }
-.ma-detail-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.65fr); gap: var(--ma-space-6); align-items: start; }
+.ma-detail-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.65fr); gap: var(--ma-space-6); align-items: start; margin-bottom: var(--ma-space-6); }
 .ma-definition-list { display: grid; gap: 0; margin: 0 0 var(--ma-space-6); }
 .ma-definition-list > div { display: grid; grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1.3fr); gap: var(--ma-space-3); padding: 12px 0; border-bottom: 1px solid var(--ma-border-soft); }
 .ma-definition-list dt { color: var(--ma-purple-soft); font-family: "Instrument Sans", Arial, sans-serif; font-size: 12px; font-weight: 700; }
@@ -567,4 +567,25 @@ h1, h2, h3, h4, .ma-brand strong, .ma-button, .ma-topbar__title {
     .ma-definition-list > div { grid-template-columns: 1fr; gap: 2px; }
     .ma-pagination { align-items: stretch; flex-direction: column; }
     .ma-pagination__actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+
+/* Milestone 06: Types, Styles & Location management */
+.ma-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ma-space-3);
+    min-height: 44px;
+    color: var(--ma-text-soft);
+    cursor: pointer;
+}
+.ma-checkbox input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ma-purple);
+}
+.ma-form-actions > form { margin: 0; }
+
+@media (max-width: 720px) {
+    .ma-form-actions > form { width: 100%; }
 }

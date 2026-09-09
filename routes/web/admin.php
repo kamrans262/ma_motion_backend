@@ -3,39 +3,80 @@
 use App\Features\Admin\Http\Controllers\Auth\LoginController;
 use App\Features\Admin\Http\Controllers\Auth\LogoutController;
 use App\Features\Admin\Http\Controllers\DashboardController;
+use App\Features\Admin\Locations\Http\Controllers\DestroyController as LocationDestroyController;
+use App\Features\Admin\Locations\Http\Controllers\EditController as LocationEditController;
+use App\Features\Admin\Locations\Http\Controllers\IndexController as LocationIndexController;
+use App\Features\Admin\Locations\Http\Controllers\StoreController as LocationStoreController;
+use App\Features\Admin\Locations\Http\Controllers\ToggleStatusController as LocationToggleStatusController;
+use App\Features\Admin\Locations\Http\Controllers\UpdateController as LocationUpdateController;
 use App\Features\Admin\Makers\Http\Controllers\IndexController as MakerIndexController;
 use App\Features\Admin\Makers\Http\Controllers\ShowController as MakerShowController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateController as MakerUpdateController;
+use App\Features\Admin\Taxonomy\Styles\Http\Controllers\DestroyController as StyleDestroyController;
+use App\Features\Admin\Taxonomy\Styles\Http\Controllers\EditController as StyleEditController;
+use App\Features\Admin\Taxonomy\Styles\Http\Controllers\IndexController as StyleIndexController;
+use App\Features\Admin\Taxonomy\Styles\Http\Controllers\StoreController as StyleStoreController;
+use App\Features\Admin\Taxonomy\Styles\Http\Controllers\ToggleStatusController as StyleToggleStatusController;
+use App\Features\Admin\Taxonomy\Styles\Http\Controllers\UpdateController as StyleUpdateController;
+use App\Features\Admin\Taxonomy\Types\Http\Controllers\DestroyController as TypeDestroyController;
+use App\Features\Admin\Taxonomy\Types\Http\Controllers\EditController as TypeEditController;
+use App\Features\Admin\Taxonomy\Types\Http\Controllers\IndexController as TypeIndexController;
+use App\Features\Admin\Taxonomy\Types\Http\Controllers\StoreController as TypeStoreController;
+use App\Features\Admin\Taxonomy\Types\Http\Controllers\ToggleStatusController as TypeToggleStatusController;
+use App\Features\Admin\Taxonomy\Types\Http\Controllers\UpdateController as TypeUpdateController;
 use App\Features\Admin\Users\Http\Controllers\DestroyController as UserDestroyController;
 use App\Features\Admin\Users\Http\Controllers\IndexController as UserIndexController;
 use App\Features\Admin\Users\Http\Controllers\ShowController as UserShowController;
 use App\Features\Admin\Users\Http\Controllers\UpdateController as UserUpdateController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')
-    ->name('admin.')
-    ->group(function (): void {
-        Route::get('/login', [LoginController::class, 'create'])->name('login');
-        Route::post('/login', [LoginController::class, 'store'])
-            ->middleware('throttle:admin-login')
-            ->name('login.store');
+Route::prefix('admin')->name('admin.')->group(function (): void {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:admin-login')->name('login.store');
 
-        Route::middleware('admin.access')->group(function (): void {
-            Route::get('/', DashboardController::class)->name('dashboard');
+    Route::middleware('admin.access')->group(function (): void {
+        Route::get('/', DashboardController::class)->name('dashboard');
 
-            Route::prefix('users')->name('users.')->group(function (): void {
-                Route::get('/', UserIndexController::class)->name('index');
-                Route::get('/{user}', UserShowController::class)->whereNumber('user')->name('show');
-                Route::put('/{user}', UserUpdateController::class)->whereNumber('user')->name('update');
-                Route::delete('/{user}', UserDestroyController::class)->whereNumber('user')->name('destroy');
-            });
-
-            Route::prefix('makers')->name('makers.')->group(function (): void {
-                Route::get('/', MakerIndexController::class)->name('index');
-                Route::get('/{maker}', MakerShowController::class)->whereNumber('maker')->name('show');
-                Route::put('/{maker}', MakerUpdateController::class)->whereNumber('maker')->name('update');
-            });
-
-            Route::post('/logout', LogoutController::class)->name('logout');
+        Route::prefix('users')->name('users.')->group(function (): void {
+            Route::get('/', UserIndexController::class)->name('index');
+            Route::get('/{user}', UserShowController::class)->whereNumber('user')->name('show');
+            Route::put('/{user}', UserUpdateController::class)->whereNumber('user')->name('update');
+            Route::delete('/{user}', UserDestroyController::class)->whereNumber('user')->name('destroy');
         });
+
+        Route::prefix('makers')->name('makers.')->group(function (): void {
+            Route::get('/', MakerIndexController::class)->name('index');
+            Route::get('/{maker}', MakerShowController::class)->whereNumber('maker')->name('show');
+            Route::put('/{maker}', MakerUpdateController::class)->whereNumber('maker')->name('update');
+        });
+
+        Route::prefix('types')->name('types.')->group(function (): void {
+            Route::get('/', TypeIndexController::class)->name('index');
+            Route::post('/', TypeStoreController::class)->name('store');
+            Route::get('/{type}/edit', TypeEditController::class)->whereNumber('type')->name('edit');
+            Route::put('/{type}', TypeUpdateController::class)->whereNumber('type')->name('update');
+            Route::patch('/{type}/status', TypeToggleStatusController::class)->whereNumber('type')->name('toggle-status');
+            Route::delete('/{type}', TypeDestroyController::class)->whereNumber('type')->name('destroy');
+        });
+
+        Route::prefix('styles')->name('styles.')->group(function (): void {
+            Route::get('/', StyleIndexController::class)->name('index');
+            Route::post('/', StyleStoreController::class)->name('store');
+            Route::get('/{style}/edit', StyleEditController::class)->whereNumber('style')->name('edit');
+            Route::put('/{style}', StyleUpdateController::class)->whereNumber('style')->name('update');
+            Route::patch('/{style}/status', StyleToggleStatusController::class)->whereNumber('style')->name('toggle-status');
+            Route::delete('/{style}', StyleDestroyController::class)->whereNumber('style')->name('destroy');
+        });
+
+        Route::prefix('locations')->name('locations.')->group(function (): void {
+            Route::get('/', LocationIndexController::class)->name('index');
+            Route::post('/', LocationStoreController::class)->name('store');
+            Route::get('/{location}/edit', LocationEditController::class)->whereNumber('location')->name('edit');
+            Route::put('/{location}', LocationUpdateController::class)->whereNumber('location')->name('update');
+            Route::patch('/{location}/status', LocationToggleStatusController::class)->whereNumber('location')->name('toggle-status');
+            Route::delete('/{location}', LocationDestroyController::class)->whereNumber('location')->name('destroy');
+        });
+
+        Route::post('/logout', LogoutController::class)->name('logout');
     });
+});

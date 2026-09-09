@@ -17,11 +17,12 @@ final class ShowController extends Controller
             throw (new ModelNotFoundException())->setModel(User::class, [$maker->getKey()]);
         }
 
-        $maker->loadMissing('makerProfile');
+        $maker->loadMissing('makerProfile.location');
 
         return view('admin.makers.show', [
             'maker' => $maker,
             'statuses' => $makers->statuses(),
+            'locations' => $makers->locations(),
         ]);
     }
 }

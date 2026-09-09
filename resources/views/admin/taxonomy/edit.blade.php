@@ -1,0 +1,9 @@
+@extends('admin.layouts.app')
+@section('title', $pageTitle)
+@section('page_heading', $pageTitle)
+@section('content')
+<section class="ma-page-heading"><div><p class="ma-eyebrow">Discovery Taxonomy</p><h2>{{ $pageTitle }}</h2><p>Update this managed option without changing the architecture or filter contract.</p></div><a class="ma-button ma-button--outline" href="{{ route($routePrefix.'.index') }}">Back to {{ $singular }}s</a></section>
+@if ($errors->any())<div class="ma-alert ma-alert--error" role="alert"><div><strong>Please correct the following.</strong><ul class="ma-error-list">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div></div>@endif
+<section class="ma-panel"><div class="ma-panel__header"><div><p class="ma-eyebrow">{{ $singular }} #{{ $item->id }}</p><h3>{{ $item->name }}</h3></div><span class="ma-badge {{ $item->is_active ? 'ma-badge--success' : 'ma-badge--muted' }}">{{ $item->is_active ? 'Active' : 'Inactive' }}</span></div>
+<form class="ma-form" method="POST" action="{{ route($routePrefix.'.update', $item) }}">@csrf @method('PUT')<div class="ma-field"><label for="name">Name</label><input id="name" name="name" type="text" maxlength="120" value="{{ old('name', $item->name) }}" required></div><div class="ma-field"><label for="sort_order">Sort order</label><input id="sort_order" name="sort_order" type="number" min="0" max="1000000" value="{{ old('sort_order', $item->sort_order) }}" required></div><input type="hidden" name="is_active" value="0"><label class="ma-checkbox"><input name="is_active" type="checkbox" value="1" @checked((string) old('is_active', $item->is_active ? '1' : '0') === '1')><span>Enabled</span></label><div class="ma-form-actions"><button class="ma-button ma-button--primary" type="submit">Save {{ $singular }}</button></div></form></section>
+@endsection

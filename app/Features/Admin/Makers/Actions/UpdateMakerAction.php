@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 final class UpdateMakerAction
 {
-    /** @param array{name:string,email:string,status:string,bio?:string|null,location_text?:string|null} $data */
+    /** @param array{name:string,email:string,status:string,bio?:string|null,location_text?:string|null,location_id?:int|null} $data */
     public function execute(User $maker, array $data): User
     {
         if (! $maker->hasRole(UserRole::Maker)) {
@@ -32,6 +32,7 @@ final class UpdateMakerAction
                 [
                     'bio' => $this->nullableTrim($data['bio'] ?? null),
                     'location_text' => $this->nullableTrim($data['location_text'] ?? null),
+                    'location_id' => $data['location_id'] ?? null,
                 ],
             );
 
@@ -39,18 +40,14 @@ final class UpdateMakerAction
                 $maker->tokens()->delete();
             }
 
-            return $maker->refresh()->load('makerProfile');
+            return $maker->refresh()->load('makerProfile.location');
         });
     }
 
     private function nullableTrim(?string $value): ?string
     {
-        if ($value === null) {
-            return null;
-        }
-
+        if ($value === null) return null;
         $value = trim($value);
-
         return $value === '' ? null : $value;
     }
 }

@@ -48,7 +48,7 @@
                     @foreach ($makers as $maker)
                         <tr>
                             <td data-label="Maker"><strong>{{ $maker->name }}</strong><small>{{ $maker->email }}</small></td>
-                            <td data-label="Location">{{ $maker->makerProfile?->location_text ?? 'Not set' }}</td>
+                            <td data-label="Location">{{ $maker->makerProfile?->location?->displayLabel() ?? $maker->makerProfile?->location_text ?? 'Not set' }}</td>
                             <td data-label="Status"><span class="ma-badge {{ $maker->isActive() ? 'ma-badge--success' : 'ma-badge--muted' }}">{{ ucfirst($maker->status->value) }}</span></td>
                             <td data-label="Profile">{{ filled($maker->makerProfile?->bio) ? 'Bio added' : 'Needs bio' }}</td>
                             <td data-label="Action"><a class="ma-text-link" href="{{ route('admin.makers.show', $maker) }}">Manage</a></td>
