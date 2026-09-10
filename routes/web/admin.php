@@ -8,6 +8,9 @@ use App\Features\Admin\Artworks\Http\Controllers\SetPrimaryMediaController as Ar
 use App\Features\Admin\Artworks\Http\Controllers\ShowController as ArtworkShowController;
 use App\Features\Admin\Artworks\Http\Controllers\ToggleVisibilityController as ArtworkToggleVisibilityController;
 use App\Features\Admin\Artworks\Http\Controllers\UpdateController as ArtworkUpdateController;
+use App\Features\Admin\FeaturedMaker\Http\Controllers\DestroyController as FeaturedMakerDestroyController;
+use App\Features\Admin\FeaturedMaker\Http\Controllers\IndexController as FeaturedMakerIndexController;
+use App\Features\Admin\FeaturedMaker\Http\Controllers\UpdateController as FeaturedMakerUpdateController;
 use App\Features\Admin\Http\Controllers\Auth\LoginController;
 use App\Features\Admin\Http\Controllers\Auth\LogoutController;
 use App\Features\Admin\Http\Controllers\DashboardController;
@@ -66,6 +69,12 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         });
 
         Route::get('/saves', SaveIndexController::class)->name('saves.index');
+
+        Route::prefix('featured-maker')->name('featured-maker.')->group(function (): void {
+            Route::get('/', FeaturedMakerIndexController::class)->name('index');
+            Route::put('/', FeaturedMakerUpdateController::class)->name('update');
+            Route::delete('/', FeaturedMakerDestroyController::class)->name('destroy');
+        });
 
         Route::prefix('artworks')->name('artworks.')->group(function (): void {
             Route::get('/', ArtworkIndexController::class)->name('index');
