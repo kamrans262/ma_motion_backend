@@ -2,9 +2,11 @@
 
 namespace App\Features\Admin\Services;
 
+use App\Features\Admin\Audit\Models\AdminAuditLog;
 use App\Features\Artworks\Models\Artwork;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
+use App\Features\Notifications\Models\InAppNotification;
 use App\Features\Saves\Models\MakerSave;
 use App\Features\Shows\Models\Show;
 use App\Models\User;
@@ -24,9 +26,13 @@ final class AdminDashboardService
             'total_artworks' => Artwork::query()->count(),
             'total_shows' => Show::query()->count(),
             'total_maker_saves' => MakerSave::query()->count(),
+            'total_notifications' => InAppNotification::query()->count(),
+            'total_audit_events' => AdminAuditLog::query()->count(),
+            'audit_events_today' => AdminAuditLog::query()->whereDate('created_at', now()->toDateString())->count(),
             'recent_users' => $this->recentUsers(),
             'recent_artworks' => $this->recentArtworks(),
             'top_makers' => $this->topMakers(),
+            'recent_audit' => AdminAuditLog::query()->with('admin:id,name')->latest('id')->limit(5)->get(),
         ];
     }
 

@@ -1,5 +1,10 @@
 <?php
 
+use App\Features\Admin\Analytics\Http\Controllers\ExportController as AnalyticsExportController;
+use App\Features\Admin\Analytics\Http\Controllers\IndexController as AnalyticsIndexController;
+use App\Features\Admin\Audit\Http\Controllers\ExportController as AuditLogExportController;
+use App\Features\Admin\Audit\Http\Controllers\IndexController as AuditLogIndexController;
+use App\Features\Admin\Audit\Http\Middleware\LogAdminActivity;
 use App\Features\Admin\Artworks\Http\Controllers\DestroyController as ArtworkDestroyController;
 use App\Features\Admin\Artworks\Http\Controllers\DestroyMediaController as ArtworkDestroyMediaController;
 use App\Features\Admin\Artworks\Http\Controllers\IndexController as ArtworkIndexController;
@@ -60,10 +65,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:admin-login')->name('login.store');
+    Route::post('/login', [LoginController::class, 'store'])->middleware(['throttle:admin-login', LogAdminActivity::class])->name('login.store');
 
-    Route::middleware('admin.access')->group(function (): void {
+    Route::middleware(['admin.access', LogAdminActivity::class])->group(function (): void {
         Route::get('/', DashboardController::class)->name('dashboard');
+
+        Route::prefix('analytics')->name('analytics.')->group(function (): void {
+            Route::get('/', AnalyticsIndexController::class)->name('index');
+            Route::get('/export', AnalyticsExportController::class)->name('export');
+        });
+
+        Route::prefix('audit-logs')->name('audit-logs.')->group(function (): void {
+            Route::get('/', AuditLogIndexController::class)->name('index');
+            Route::get('/export', AuditLogExportController::class)->name('export');
+        });
 
         Route::prefix('users')->name('users.')->group(function (): void {
             Route::get('/', UserIndexController::class)->name('index');
