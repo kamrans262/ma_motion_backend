@@ -10,7 +10,7 @@
         <h2>MA Motion control center</h2>
         <p>Live account, artwork, show, and Maker-save statistics give Admin users an operational view of the platform without direct database access.</p>
     </div>
-    <span class="ma-pill"><span class="ma-status-dot" aria-hidden="true"></span> System online</span>
+    <div class="ma-page-heading__actions"><a class="ma-button ma-button--outline" href="{{ route('admin.analytics.index') }}">Open Analytics</a><a class="ma-button ma-button--outline" href="{{ route('admin.audit-logs.index') }}">Audit Logs</a></div>
 </section>
 
 <section class="ma-stat-grid" aria-label="Platform statistics">
@@ -22,6 +22,8 @@
     @include('admin.partials.stat-card', ['label' => 'Maker Saves', 'value' => $total_maker_saves, 'hint' => 'Hearts / saved Makers'])
     @include('admin.partials.stat-card', ['label' => 'Active Users', 'value' => $active_users, 'hint' => 'Accounts with access'])
     @include('admin.partials.stat-card', ['label' => 'Inactive Users', 'value' => $inactive_users, 'hint' => 'Access currently disabled'])
+    @include('admin.partials.stat-card', ['label' => 'Notifications', 'value' => $total_notifications, 'hint' => 'In-app notification records'])
+    @include('admin.partials.stat-card', ['label' => 'Audit Events', 'value' => $total_audit_events, 'hint' => $audit_events_today.' Admin actions today'])
 </section>
 
 <section class="ma-dashboard-grid">
@@ -63,6 +65,18 @@
         <div class="ma-table-wrap"><table class="ma-table"><thead><tr><th scope="col">Artwork</th><th scope="col">Maker</th><th scope="col">Moderation</th><th scope="col">Visibility</th><th scope="col">Added</th></tr></thead><tbody>
             @foreach ($recent_artworks as $artwork)
                 <tr><td data-label="Artwork"><strong><a class="ma-text-link" href="{{ route('admin.artworks.show', $artwork) }}">{{ $artwork->title }}</a></strong></td><td data-label="Maker">{{ $artwork->maker?->name ?? 'Unknown Maker' }}</td><td data-label="Moderation"><span class="ma-badge ma-badge--purple">{{ ucfirst($artwork->moderation_status->value) }}</span></td><td data-label="Visibility">{{ $artwork->is_visible ? 'Visible' : 'Hidden' }}</td><td data-label="Added">{{ $artwork->created_at?->format('M j, Y') }}</td></tr>
+            @endforeach
+        </tbody></table></div>
+    @endif
+</section>
+<section class="ma-panel ma-dashboard-section ma-dashboard-audit-panel">
+    <div class="ma-panel__header"><div><p class="ma-eyebrow">Governance</p><h3>Recent admin activity</h3></div><a class="ma-text-link" href="{{ route('admin.audit-logs.index') }}">View audit trail</a></div>
+    @if ($recent_audit->isEmpty())
+        <div class="ma-empty-state ma-empty-state--compact"><span class="ma-empty-state__icon" aria-hidden="true">◇</span><h4>No audited actions yet</h4><p>Authenticated Admin write operations will appear here.</p></div>
+    @else
+        <div class="ma-table-wrap"><table class="ma-table"><thead><tr><th>Admin</th><th>Action</th><th>Status</th><th>When</th></tr></thead><tbody>
+            @foreach ($recent_audit as $entry)
+                <tr><td data-label="Admin">{{ $entry->admin?->name ?? 'Deleted admin' }}</td><td data-label="Action">{{ $entry->route_name ?? $entry->event }}</td><td data-label="Status">{{ $entry->response_status }}</td><td data-label="When">{{ $entry->created_at?->format('M j, H:i') }}</td></tr>
             @endforeach
         </tbody></table></div>
     @endif

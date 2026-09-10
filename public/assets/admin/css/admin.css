@@ -1038,3 +1038,39 @@ h1, h2, h3, h4, .ma-brand strong, .ma-button, .ma-topbar__title {
     .ma-content-filter-grid .ma-filter-actions,
     .ma-settings-account-card { grid-column: auto; }
 }
+
+
+/* Milestone 14 — Dashboard, Analytics & Audit */
+.ma-page-heading__actions { display: flex; flex-wrap: wrap; gap: var(--ma-space-3); align-items: center; }
+.ma-analytics-filter-panel { margin-bottom: var(--ma-space-6); }
+.ma-analytics-period-form { display: grid; grid-template-columns: minmax(220px, 360px) auto; gap: var(--ma-space-4); align-items: end; }
+.ma-analytics-grid, .ma-audit-stat-grid { margin-bottom: var(--ma-space-6); }
+.ma-analytics-period-panel { margin-bottom: var(--ma-space-6); }
+.ma-analytics-period-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--ma-space-3); }
+.ma-analytics-period-stats > div { padding: var(--ma-space-4); border: 1px solid var(--ma-border); border-radius: var(--ma-radius-md); background: rgba(255,255,255,.025); }
+.ma-analytics-period-stats span { display: block; color: var(--ma-text-muted); font-size: .78rem; }
+.ma-analytics-period-stats strong { display: block; margin-top: var(--ma-space-2); font-family: 'Instrument Sans', Arial, sans-serif; font-size: 1.5rem; }
+.ma-analytics-breakdown-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ma-space-4); margin-bottom: var(--ma-space-6); }
+.ma-analytics-main-grid, .ma-analytics-audit-grid { margin-bottom: var(--ma-space-6); }
+.ma-analytics-table-wrap { max-height: 520px; overflow: auto; scrollbar-width: thin; scrollbar-color: rgba(158, 92, 255, .8) rgba(255,255,255,.04); }
+.ma-analytics-table-wrap::-webkit-scrollbar { width: 8px; height: 8px; }
+.ma-analytics-table-wrap::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(169, 104, 255, .95), rgba(112, 63, 214, .9)); border-radius: 999px; }
+.ma-audit-filter-grid { display: grid; grid-template-columns: minmax(220px, 1.4fr) repeat(5, minmax(130px, 1fr)); gap: var(--ma-space-4); align-items: end; }
+.ma-audit-filter-grid .ma-filter-actions { grid-column: 1 / -1; }
+.ma-audit-directory { margin-top: var(--ma-space-6); }
+.ma-audit-table code, .ma-analytics-activity-table code { font-family: Consolas, 'Courier New', monospace; font-size: .8rem; }
+.ma-pagination { margin-top: var(--ma-space-5); }
+.ma-dashboard-audit-panel { margin-top: var(--ma-space-6); }
+
+@media (max-width: 1180px) {
+    .ma-analytics-period-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .ma-audit-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+    .ma-page-heading__actions { width: 100%; }
+    .ma-page-heading__actions .ma-button { flex: 1 1 150px; }
+    .ma-analytics-period-form { grid-template-columns: 1fr; }
+    .ma-analytics-period-stats, .ma-analytics-breakdown-grid, .ma-audit-filter-grid { grid-template-columns: 1fr; }
+    .ma-audit-filter-grid .ma-filter-actions { grid-column: auto; }
+}
