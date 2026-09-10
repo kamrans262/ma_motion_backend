@@ -50,7 +50,12 @@
             <span class="ma-nav__icon" aria-hidden="true">◆</span>
             <span>Featured Maker</span>
         </a>
-        <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true"><span class="ma-nav__icon" aria-hidden="true">◇</span><span>Notifications</span><span class="ma-nav__soon">Soon</span></span>
+        <a class="ma-nav__item {{ request()->routeIs('admin.notifications.*') ? 'ma-nav__item--active' : '' }}"
+           href="{{ route('admin.notifications.index') }}"
+           @if(request()->routeIs('admin.notifications.*')) aria-current="page" @endif>
+            <span class="ma-nav__icon" aria-hidden="true">◆</span>
+            <span>Notifications</span>
+        </a>
 
         <p class="ma-nav__label">System</p>
         @foreach (['Content', 'Analytics', 'Settings', 'Audit Logs'] as $item)

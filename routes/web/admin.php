@@ -20,6 +20,7 @@ use App\Features\Admin\Locations\Http\Controllers\IndexController as LocationInd
 use App\Features\Admin\Locations\Http\Controllers\StoreController as LocationStoreController;
 use App\Features\Admin\Locations\Http\Controllers\ToggleStatusController as LocationToggleStatusController;
 use App\Features\Admin\Locations\Http\Controllers\UpdateController as LocationUpdateController;
+use App\Features\Admin\Notifications\Http\Controllers\IndexController as NotificationIndexController;
 use App\Features\Admin\Makers\Http\Controllers\IndexController as MakerIndexController;
 use App\Features\Admin\Makers\Http\Controllers\ShowController as MakerShowController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateController as MakerUpdateController;
@@ -69,6 +70,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         });
 
         Route::get('/saves', SaveIndexController::class)->name('saves.index');
+        Route::get('/notifications', NotificationIndexController::class)->name('notifications.index');
 
         Route::prefix('featured-maker')->name('featured-maker.')->group(function (): void {
             Route::get('/', FeaturedMakerIndexController::class)->name('index');

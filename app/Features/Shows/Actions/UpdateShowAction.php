@@ -2,6 +2,7 @@
 
 namespace App\Features\Shows\Actions;
 
+use App\Features\Notifications\Services\SavedMakerShowNotificationService;
 use App\Features\Shows\Models\Show;
 use App\Features\Shows\Services\ShowArtworkSyncService;
 use App\Features\Shows\Support\ShowData;
@@ -11,12 +12,15 @@ use Illuminate\Validation\ValidationException;
 
 final class UpdateShowAction
 {
-    public function __construct(private readonly ShowArtworkSyncService $artworkSync) {}
+    public function __construct(
+        private readonly ShowArtworkSyncService $artworkSync,
+        private readonly SavedMakerShowNotificationService $notifications,
+    ) {}
 
     /** @param array<string, mixed> $data */
     public function execute(Show $show, array $data): Show
     {
-        return DB::transaction(function () use ($show, $data): Show {
+        $updated = DB::transaction(function () use ($show, $data): Show {
             $hasArtworkSelection = array_key_exists('artwork_ids', $data);
             $artworkIds = $hasArtworkSelection ? (array) $data['artwork_ids'] : [];
             unset($data['artwork_ids']);
@@ -43,5 +47,9 @@ final class UpdateShowAction
 
             return $show->fresh(['maker', 'location', 'artworks.type', 'artworks.style', 'artworks.primaryMedia']);
         });
+
+        $this->notifications->announceIfEligible($updated);
+
+        return $updated;
     }
 }

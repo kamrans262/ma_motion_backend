@@ -2,6 +2,7 @@
 
 namespace App\Features\Shows\Actions;
 
+use App\Features\Notifications\Services\SavedMakerShowNotificationService;
 use App\Features\Shows\Models\Show;
 use App\Features\Shows\Services\ShowArtworkSyncService;
 use App\Features\Shows\Support\ShowData;
@@ -10,12 +11,15 @@ use Illuminate\Support\Facades\DB;
 
 final class CreateShowAction
 {
-    public function __construct(private readonly ShowArtworkSyncService $artworkSync) {}
+    public function __construct(
+        private readonly ShowArtworkSyncService $artworkSync,
+        private readonly SavedMakerShowNotificationService $notifications,
+    ) {}
 
     /** @param array<string, mixed> $data */
     public function execute(User $maker, array $data): Show
     {
-        return DB::transaction(function () use ($maker, $data): Show {
+        $show = DB::transaction(function () use ($maker, $data): Show {
             $hasArtworkSelection = array_key_exists('artwork_ids', $data);
             $artworkIds = $hasArtworkSelection ? (array) $data['artwork_ids'] : [];
             unset($data['artwork_ids']);
@@ -31,5 +35,9 @@ final class CreateShowAction
 
             return $show->load(['maker', 'location', 'artworks.type', 'artworks.style', 'artworks.primaryMedia']);
         });
+
+        $this->notifications->announceIfEligible($show);
+
+        return $show;
     }
 }

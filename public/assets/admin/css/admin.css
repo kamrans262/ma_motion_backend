@@ -920,3 +920,90 @@ h1, h2, h3, h4, .ma-brand strong, .ma-button, .ma-topbar__title {
     .ma-featured-maker-preview__visual img { min-height: 220px; height: 220px; }
     .ma-featured-maker-artwork-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+
+/* Milestone 11: in-app notifications */
+.ma-notification-stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: var(--ma-space-6);
+}
+.ma-notification-filter-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.5fr) minmax(170px, 0.55fr) minmax(200px, 0.75fr) auto;
+    gap: var(--ma-space-4);
+    align-items: end;
+}
+.ma-notification-policy {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--ma-space-5);
+    align-items: center;
+    margin-bottom: var(--ma-space-6);
+}
+.ma-notification-policy__copy { max-width: 760px; }
+.ma-notification-policy__copy h3 { margin: 4px 0 8px; }
+.ma-notification-policy__copy p { margin: 0; color: var(--ma-text-soft); }
+.ma-notification-policy__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid rgba(181, 138, 255, 0.42);
+    border-radius: 999px;
+    background: rgba(139, 61, 255, 0.11);
+    color: var(--ma-purple-soft);
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ma-notification-policy__badge::before {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ma-purple-soft);
+    box-shadow: 0 0 0 4px rgba(181, 138, 255, 0.11);
+    content: '';
+}
+.ma-notification-table td[data-label="Message"] { min-width: 280px; }
+.ma-notification-message { display: grid; gap: 4px; }
+.ma-notification-message strong { color: var(--ma-text); }
+.ma-notification-message small { color: var(--ma-muted); line-height: 1.45; }
+.ma-notification-context { display: grid; gap: 3px; }
+.ma-notification-context a { width: fit-content; }
+.ma-notification-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.ma-notification-state::before {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--ma-muted);
+    content: '';
+}
+.ma-notification-state--unread { color: var(--ma-purple-soft); }
+.ma-notification-state--unread::before { background: var(--ma-purple-soft); box-shadow: 0 0 0 4px rgba(181, 138, 255, 0.10); }
+.ma-notification-settings-card {
+    display: grid;
+    gap: var(--ma-space-3);
+    padding: var(--ma-space-4);
+    border: 1px solid var(--ma-border-soft);
+    background: rgba(4, 28, 18, 0.30);
+}
+
+@media (max-width: 1100px) {
+    .ma-notification-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ma-notification-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ma-notification-filter-grid .ma-filter-actions { grid-column: 1 / -1; }
+}
+
+@media (max-width: 720px) {
+    .ma-notification-stat-grid,
+    .ma-notification-filter-grid { grid-template-columns: 1fr; }
+    .ma-notification-filter-grid .ma-filter-actions { grid-column: auto; }
+    .ma-notification-policy { grid-template-columns: 1fr; }
+    .ma-notification-policy__badge { width: fit-content; }
+}
