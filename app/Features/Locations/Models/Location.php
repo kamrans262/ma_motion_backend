@@ -4,6 +4,7 @@ namespace App\Features\Locations\Models;
 
 use App\Features\Artworks\Models\Artwork;
 use App\Features\Makers\Models\MakerProfile;
+use App\Features\Shows\Models\Show;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,5 +42,11 @@ final class Location extends Model
     public function artworks(): HasMany
     {
         return $this->hasMany(Artwork::class);
+    }
+
+    /** @return HasMany<Show, $this> */
+    public function shows(): HasMany
+    {
+        return $this->hasMany(Show::class);
     }
 }

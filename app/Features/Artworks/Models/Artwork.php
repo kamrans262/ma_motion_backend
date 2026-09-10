@@ -4,12 +4,14 @@ namespace App\Features\Artworks\Models;
 
 use App\Features\Artworks\Enums\ArtworkModerationStatus;
 use App\Features\Locations\Models\Location;
+use App\Features\Shows\Models\Show;
 use App\Features\Taxonomy\Models\ArtworkStyle;
 use App\Features\Taxonomy\Models\ArtworkType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -74,5 +76,13 @@ final class Artwork extends Model
     public function primaryMedia(): HasOne
     {
         return $this->hasOne(ArtworkMedia::class)->where('is_primary', true);
+    }
+
+    /** @return BelongsToMany<Show, $this> */
+    public function shows(): BelongsToMany
+    {
+        return $this->belongsToMany(Show::class, 'show_artwork')
+            ->withPivot('sort_order')
+            ->withTimestamps();
     }
 }
