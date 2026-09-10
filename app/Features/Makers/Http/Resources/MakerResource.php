@@ -21,6 +21,7 @@ final class MakerResource extends JsonResource
             'profile_image_url' => $profile?->profile_image_path
                 ? Storage::disk('public')->url($profile->profile_image_path)
                 : null,
+            'saved_count' => (int) ($this->saves_count ?? 0),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

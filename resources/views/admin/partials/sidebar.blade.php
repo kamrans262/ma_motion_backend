@@ -32,6 +32,12 @@
             <span class="ma-nav__icon" aria-hidden="true">◆</span>
             <span>Makers</span>
         </a>
+        <a class="ma-nav__item {{ request()->routeIs('admin.saves.*') ? 'ma-nav__item--active' : '' }}"
+           href="{{ route('admin.saves.index') }}"
+           @if(request()->routeIs('admin.saves.*')) aria-current="page" @endif>
+            <span class="ma-nav__icon" aria-hidden="true">◆</span>
+            <span>Hearts & Saves</span>
+        </a>
 
         <a class="ma-nav__item {{ request()->routeIs('admin.artworks.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.artworks.index') }}" @if(request()->routeIs('admin.artworks.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Artwork</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.shows.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.shows.index') }}" @if(request()->routeIs('admin.shows.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Shows</span></a>

@@ -8,7 +8,7 @@
     <div>
         <p class="ma-eyebrow">Maker #{{ $maker->id }}</p>
         <h2>{{ $maker->name }}</h2>
-        <p>Manage the Maker account and connect the profile to the structured location directory used by MA Motion discovery.</p>
+        <p>Manage the Maker account, structured location, and the aggregate profile-save statistics used across MA Motion.</p>
     </div>
     <a class="ma-button ma-button--outline" href="{{ route('admin.makers.index') }}">Back to Makers</a>
 </section>
@@ -35,15 +35,16 @@
     </section>
 
     <aside class="ma-panel">
-        <div class="ma-panel__header"><div><p class="ma-eyebrow">Profile Readiness</p><h3>Current details</h3></div></div>
+        <div class="ma-panel__header"><div><p class="ma-eyebrow">Profile & Statistics</p><h3>Current details</h3></div></div>
         <dl class="ma-definition-list">
             <div><dt>Bio</dt><dd>{{ filled($maker->makerProfile?->bio) ? 'Added' : 'Not added' }}</dd></div>
             <div><dt>Managed location</dt><dd>{{ $maker->makerProfile?->location?->displayLabel() ?? 'Not linked' }}</dd></div>
             <div><dt>Location label</dt><dd>{{ $maker->makerProfile?->location_text ?? 'Not set' }}</dd></div>
             <div><dt>Profile image</dt><dd>{{ $maker->makerProfile?->profile_image_path ? 'Available' : 'Not uploaded' }}</dd></div>
+            <div><dt>Hearts / Saves</dt><dd><strong>{{ number_format($maker->saves_count) }}</strong><br><a class="ma-text-link" href="{{ route('admin.saves.index', ['maker_id' => $maker->id]) }}">View save details</a></dd></div>
             <div><dt>Joined</dt><dd>{{ $maker->created_at?->format('M j, Y') }}</dd></div>
         </dl>
-        <div class="ma-callout"><strong>Location foundation</strong><p>Coordinates are stored centrally so later discovery can add radius search without changing Maker profile data again.</p></div>
+        <div class="ma-callout"><strong>Privacy boundary</strong><p>Makers receive only their aggregate profile-saved count. The Appreciator-to-Maker relationship directory is restricted to Admin users.</p></div>
         <a class="ma-button ma-button--outline ma-button--full" href="{{ route('admin.users.show', $maker) }}">Open User Account</a>
     </aside>
 </div>

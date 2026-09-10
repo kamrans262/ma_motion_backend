@@ -16,8 +16,9 @@ final class MakerManagementService
     {
         $query = User::query()
             ->where('role', UserRole::Maker->value)
-            ->with('makerProfile.location')
             ->select(['id', 'name', 'email', 'role', 'status', 'created_at'])
+            ->with('makerProfile.location')
+            ->withCount(['savedByAppreciators as saves_count'])
             ->latest('id');
 
         $search = trim((string) ($filters['search'] ?? ''));
@@ -37,13 +38,19 @@ final class MakerManagementService
             });
         }
 
-        if (! empty($filters['status'])) $query->where('status', $filters['status']);
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
         return $query->paginate(20)->withQueryString();
     }
 
+    /** @return array<string, string> */
     public function statuses(): array
     {
-        return collect(UserStatus::cases())->mapWithKeys(static fn (UserStatus $status): array => [$status->value => ucfirst($status->value)])->all();
+        return collect(UserStatus::cases())
+            ->mapWithKeys(static fn (UserStatus $status): array => [$status->value => ucfirst($status->value)])
+            ->all();
     }
 
     /** @return Collection<int, Location> */
