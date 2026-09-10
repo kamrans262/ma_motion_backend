@@ -47,6 +47,15 @@ use App\Features\Admin\Users\Http\Controllers\DestroyController as UserDestroyCo
 use App\Features\Admin\Users\Http\Controllers\IndexController as UserIndexController;
 use App\Features\Admin\Users\Http\Controllers\ShowController as UserShowController;
 use App\Features\Admin\Users\Http\Controllers\UpdateController as UserUpdateController;
+use App\Features\Admin\Content\Http\Controllers\DestroyController as ContentDestroyController;
+use App\Features\Admin\Content\Http\Controllers\EditController as ContentEditController;
+use App\Features\Admin\Content\Http\Controllers\IndexController as ContentIndexController;
+use App\Features\Admin\Content\Http\Controllers\StoreController as ContentStoreController;
+use App\Features\Admin\Content\Http\Controllers\TogglePublishController as ContentTogglePublishController;
+use App\Features\Admin\Content\Http\Controllers\UpdateController as ContentUpdateController;
+use App\Features\Admin\Settings\Http\Controllers\ChangePasswordController as AdminSettingsChangePasswordController;
+use App\Features\Admin\Settings\Http\Controllers\IndexController as AdminSettingsIndexController;
+use App\Features\Admin\Settings\Http\Controllers\UpdateProfileController as AdminSettingsUpdateProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
@@ -123,6 +132,22 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::put('/{location}', LocationUpdateController::class)->whereNumber('location')->name('update');
             Route::patch('/{location}/status', LocationToggleStatusController::class)->whereNumber('location')->name('toggle-status');
             Route::delete('/{location}', LocationDestroyController::class)->whereNumber('location')->name('destroy');
+        });
+
+
+        Route::prefix('content')->name('content.')->group(function (): void {
+            Route::get('/', ContentIndexController::class)->name('index');
+            Route::post('/', ContentStoreController::class)->name('store');
+            Route::get('/{contentPage}/edit', ContentEditController::class)->whereNumber('contentPage')->name('edit');
+            Route::put('/{contentPage}', ContentUpdateController::class)->whereNumber('contentPage')->name('update');
+            Route::patch('/{contentPage}/publish', ContentTogglePublishController::class)->whereNumber('contentPage')->name('toggle-publish');
+            Route::delete('/{contentPage}', ContentDestroyController::class)->whereNumber('contentPage')->name('destroy');
+        });
+
+        Route::prefix('settings')->name('settings.')->group(function (): void {
+            Route::get('/', AdminSettingsIndexController::class)->name('index');
+            Route::put('/profile', AdminSettingsUpdateProfileController::class)->name('profile.update');
+            Route::put('/password', AdminSettingsChangePasswordController::class)->name('password.update');
         });
 
         Route::post('/logout', LogoutController::class)->name('logout');

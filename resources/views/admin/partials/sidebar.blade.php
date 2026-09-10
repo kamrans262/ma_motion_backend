@@ -58,13 +58,10 @@
         </a>
 
         <p class="ma-nav__label">System</p>
-        @foreach (['Content', 'Analytics', 'Settings', 'Audit Logs'] as $item)
-            <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true">
-                <span class="ma-nav__icon" aria-hidden="true">◇</span>
-                <span>{{ $item }}</span>
-                <span class="ma-nav__soon">Soon</span>
-            </span>
-        @endforeach
+        <a class="ma-nav__item {{ request()->routeIs('admin.content.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.content.index') }}" @if(request()->routeIs('admin.content.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Content</span></a>
+        <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true"><span class="ma-nav__icon" aria-hidden="true">◇</span><span>Analytics</span><span class="ma-nav__soon">Soon</span></span>
+        <a class="ma-nav__item {{ request()->routeIs('admin.settings.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Settings</span></a>
+        <span class="ma-nav__item ma-nav__item--disabled" aria-disabled="true"><span class="ma-nav__icon" aria-hidden="true">◇</span><span>Audit Logs</span><span class="ma-nav__soon">Soon</span></span>
     </nav>
 
     <div class="ma-sidebar__footer">

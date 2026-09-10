@@ -9,6 +9,8 @@ Route::prefix('v1')
         Route::get('/health', HealthController::class)->name('health');
 
         require __DIR__.'/api/v1/auth.php';
+        require __DIR__.'/api/v1/account.php';
+        require __DIR__.'/api/v1/content.php';
         require __DIR__.'/api/v1/makers.php';
         require __DIR__.'/api/v1/discovery.php';
         require __DIR__.'/api/v1/saves.php';
