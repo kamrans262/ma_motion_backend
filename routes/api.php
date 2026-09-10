@@ -11,6 +11,7 @@ Route::prefix('v1')
         require __DIR__.'/api/v1/auth.php';
         require __DIR__.'/api/v1/makers.php';
         require __DIR__.'/api/v1/saves.php';
+        require __DIR__.'/api/v1/featured-maker.php';
         require __DIR__.'/api/v1/artworks.php';
         require __DIR__.'/api/v1/shows.php';
     });
