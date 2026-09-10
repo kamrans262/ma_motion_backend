@@ -6,24 +6,15 @@ use App\Features\Auth\Http\Controllers\Api\V1\LogoutController;
 use App\Features\Auth\Http\Controllers\Api\V1\MeController;
 use App\Features\Auth\Http\Controllers\Api\V1\RegisterController;
 use App\Features\Auth\Http\Controllers\Api\V1\ResetPasswordController;
+use App\Features\Auth\Http\Controllers\Api\V1\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->name('auth.')->group(function (): void {
-    Route::post('/register', RegisterController::class)
-        ->middleware('throttle:auth-register')
-        ->name('register');
-
-    Route::post('/login', LoginController::class)
-        ->middleware('throttle:auth-login')
-        ->name('login');
-
-    Route::post('/forgot-password', ForgotPasswordController::class)
-        ->middleware('throttle:auth-password')
-        ->name('forgot-password');
-
-    Route::post('/reset-password', ResetPasswordController::class)
-        ->middleware('throttle:auth-password')
-        ->name('reset-password');
+    Route::post('/register', RegisterController::class)->middleware('throttle:auth-register')->name('register');
+    Route::post('/login', LoginController::class)->middleware('throttle:auth-login')->name('login');
+    Route::post('/social/{provider}', SocialLoginController::class)->where('provider', 'google|apple')->middleware('throttle:auth-social')->name('social.login');
+    Route::post('/forgot-password', ForgotPasswordController::class)->middleware('throttle:auth-password')->name('forgot-password');
+    Route::post('/reset-password', ResetPasswordController::class)->middleware('throttle:auth-password')->name('reset-password');
 });
 
 Route::middleware(['auth:sanctum', 'account.active'])->group(function (): void {

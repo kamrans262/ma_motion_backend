@@ -3,8 +3,11 @@
 use App\Features\Admin\Http\Middleware\EnsureAdminPanelAccess;
 use App\Features\Auth\Exceptions\InactiveAccountException;
 use App\Features\Auth\Exceptions\InvalidCredentialsException;
+use App\Features\Auth\Exceptions\InvalidSocialIdentityException;
+use App\Features\Auth\Exceptions\SocialProviderUnavailableException;
 use App\Features\Auth\Http\Middleware\EnsureAccountIsActive;
 use App\Features\Auth\Http\Middleware\RequireRole;
+use App\Http\Middleware\SecurityHeaders;
 use App\Support\Api\ApiResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -27,10 +30,10 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../app/Features/Admin/Console',
     ])
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(SecurityHeaders::class);
+
         $middleware->redirectGuestsTo(
-            static fn (Request $request): ?string => $request->is('admin/*')
-                ? route('admin.login')
-                : null,
+            static fn (Request $request): ?string => $request->is('admin/*') ? route('admin.login') : null,
         );
 
         $middleware->alias([
@@ -47,77 +50,47 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (ValidationException $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
-            return ApiResponse::error(
-                message: 'The given data was invalid.',
-                status: 422,
-                errors: $exception->errors(),
-            );
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: 'The given data was invalid.', status: 422, errors: $exception->errors());
         });
 
         $exceptions->render(function (InvalidCredentialsException $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: $exception->getMessage(), status: 401);
+        });
 
-            return ApiResponse::error(
-                message: $exception->getMessage(),
-                status: 401,
-            );
+        $exceptions->render(function (InvalidSocialIdentityException $exception, Request $request) use ($isApiRequest) {
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: $exception->getMessage(), status: 401);
+        });
+
+        $exceptions->render(function (SocialProviderUnavailableException $exception, Request $request) use ($isApiRequest) {
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: $exception->getMessage(), status: 503);
         });
 
         $exceptions->render(function (InactiveAccountException $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
-            return ApiResponse::error(
-                message: $exception->getMessage(),
-                status: 403,
-            );
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: $exception->getMessage(), status: 403);
         });
 
         $exceptions->render(function (AuthenticationException $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
-            return ApiResponse::error(
-                message: 'Unauthenticated.',
-                status: 401,
-            );
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: 'Unauthenticated.', status: 401);
         });
 
         $exceptions->render(function (AuthorizationException $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
-            return ApiResponse::error(
-                message: 'You are not authorized to perform this action.',
-                status: 403,
-            );
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: 'You are not authorized to perform this action.', status: 403);
         });
 
         $exceptions->render(function (ModelNotFoundException $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
-            return ApiResponse::error(
-                message: 'Resource not found.',
-                status: 404,
-            );
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: 'Resource not found.', status: 404);
         });
 
         $exceptions->render(function (HttpExceptionInterface $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
+            if (! $isApiRequest($request)) return null;
             $status = $exception->getStatusCode();
             $message = match ($status) {
                 401 => 'Unauthenticated.',
@@ -125,26 +98,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 404 => 'API endpoint not found.',
                 405 => 'HTTP method not allowed for this endpoint.',
                 429 => 'Too many requests. Please try again later.',
-                default => $status >= 500
-                    ? 'An unexpected server error occurred.'
-                    : ($exception->getMessage() !== '' ? $exception->getMessage() : 'Request failed.'),
+                default => $status >= 500 ? 'An unexpected server error occurred.' : ($exception->getMessage() !== '' ? $exception->getMessage() : 'Request failed.'),
             };
-
-            return ApiResponse::error(
-                message: $message,
-                status: $status,
-                headers: $exception->getHeaders(),
-            );
+            return ApiResponse::error(message: $message, status: $status, headers: $exception->getHeaders());
         });
 
         $exceptions->render(function (\Throwable $exception, Request $request) use ($isApiRequest) {
-            if (! $isApiRequest($request)) {
-                return null;
-            }
-
-            return ApiResponse::error(
-                message: 'An unexpected server error occurred.',
-                status: 500,
-            );
+            if (! $isApiRequest($request)) return null;
+            return ApiResponse::error(message: 'An unexpected server error occurred.', status: 500);
         });
     })->create();
