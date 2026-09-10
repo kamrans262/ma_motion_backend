@@ -45,7 +45,8 @@ final class MakerDirectoryService
         return User::query()
             ->where('role', UserRole::Maker->value)
             ->where('status', UserStatus::Active->value)
+            ->select(['id', 'name', 'role', 'status', 'created_at'])
             ->with('makerProfile')
-            ->select(['id', 'name', 'role', 'status', 'created_at']);
+            ->withCount(['savedByAppreciators as saves_count']);
     }
 }

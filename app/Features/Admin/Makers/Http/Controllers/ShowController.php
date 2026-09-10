@@ -18,6 +18,7 @@ final class ShowController extends Controller
         }
 
         $maker->loadMissing('makerProfile.location');
+        $maker->loadCount(['savedByAppreciators as saves_count']);
 
         return view('admin.makers.show', [
             'maker' => $maker,

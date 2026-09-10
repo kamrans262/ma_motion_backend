@@ -20,6 +20,7 @@ use App\Features\Admin\Locations\Http\Controllers\UpdateController as LocationUp
 use App\Features\Admin\Makers\Http\Controllers\IndexController as MakerIndexController;
 use App\Features\Admin\Makers\Http\Controllers\ShowController as MakerShowController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateController as MakerUpdateController;
+use App\Features\Admin\Saves\Http\Controllers\IndexController as SaveIndexController;
 use App\Features\Admin\Shows\Http\Controllers\DestroyController as ShowDestroyController;
 use App\Features\Admin\Shows\Http\Controllers\IndexController as ShowIndexController;
 use App\Features\Admin\Shows\Http\Controllers\ShowController as AdminShowController;
@@ -63,6 +64,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/{maker}', MakerShowController::class)->whereNumber('maker')->name('show');
             Route::put('/{maker}', MakerUpdateController::class)->whereNumber('maker')->name('update');
         });
+
+        Route::get('/saves', SaveIndexController::class)->name('saves.index');
 
         Route::prefix('artworks')->name('artworks.')->group(function (): void {
             Route::get('/', ArtworkIndexController::class)->name('index');
