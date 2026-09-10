@@ -20,6 +20,12 @@ use App\Features\Admin\Locations\Http\Controllers\UpdateController as LocationUp
 use App\Features\Admin\Makers\Http\Controllers\IndexController as MakerIndexController;
 use App\Features\Admin\Makers\Http\Controllers\ShowController as MakerShowController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateController as MakerUpdateController;
+use App\Features\Admin\Shows\Http\Controllers\DestroyController as ShowDestroyController;
+use App\Features\Admin\Shows\Http\Controllers\IndexController as ShowIndexController;
+use App\Features\Admin\Shows\Http\Controllers\ShowController as AdminShowController;
+use App\Features\Admin\Shows\Http\Controllers\StoreController as ShowStoreController;
+use App\Features\Admin\Shows\Http\Controllers\ToggleVisibilityController as ShowToggleVisibilityController;
+use App\Features\Admin\Shows\Http\Controllers\UpdateController as ShowUpdateController;
 use App\Features\Admin\Taxonomy\Styles\Http\Controllers\DestroyController as StyleDestroyController;
 use App\Features\Admin\Taxonomy\Styles\Http\Controllers\EditController as StyleEditController;
 use App\Features\Admin\Taxonomy\Styles\Http\Controllers\IndexController as StyleIndexController;
@@ -67,6 +73,15 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::patch('/{artwork}/media/{media}/primary', ArtworkSetPrimaryMediaController::class)->whereNumber(['artwork', 'media'])->name('media.primary');
             Route::delete('/{artwork}/media/{media}', ArtworkDestroyMediaController::class)->whereNumber(['artwork', 'media'])->name('media.destroy');
             Route::delete('/{artwork}', ArtworkDestroyController::class)->whereNumber('artwork')->name('destroy');
+        });
+
+        Route::prefix('shows')->name('shows.')->group(function (): void {
+            Route::get('/', ShowIndexController::class)->name('index');
+            Route::post('/', ShowStoreController::class)->name('store');
+            Route::get('/{show}', AdminShowController::class)->whereNumber('show')->name('show');
+            Route::put('/{show}', ShowUpdateController::class)->whereNumber('show')->name('update');
+            Route::patch('/{show}/visibility', ShowToggleVisibilityController::class)->whereNumber('show')->name('toggle-visibility');
+            Route::delete('/{show}', ShowDestroyController::class)->whereNumber('show')->name('destroy');
         });
 
         Route::prefix('types')->name('types.')->group(function (): void {

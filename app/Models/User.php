@@ -7,6 +7,7 @@ use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Auth\Models\SocialAccount;
 use App\Features\Makers\Models\MakerProfile;
+use App\Features\Shows\Models\Show;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -66,5 +67,11 @@ class User extends Authenticatable
     public function artworks(): HasMany
     {
         return $this->hasMany(Artwork::class, 'maker_id');
+    }
+
+    /** @return HasMany<Show, $this> */
+    public function shows(): HasMany
+    {
+        return $this->hasMany(Show::class, 'maker_id');
     }
 }
