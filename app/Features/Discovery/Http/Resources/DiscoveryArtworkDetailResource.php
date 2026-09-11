@@ -53,7 +53,13 @@ final class DiscoveryArtworkDetailResource extends JsonResource
                 'profile_image_url' => $makerProfile?->profile_image_path
                     ? Storage::disk('public')->url($makerProfile->profile_image_path)
                     : null,
-                'website_url' => $makerProfile?->website_url,
+                'website_url' => ($makerProfile?->show_website_on_info_page ?? true)
+                    ? $makerProfile?->website_url
+                    : null,
+                'contact_email' => ($makerProfile?->show_email_on_info_page ?? false)
+                    ? $makerProfile?->contact_email
+                    : null,
+                'show_shows_on_info_page' => $makerProfile?->show_shows_on_info_page ?? true,
                 'saved_count' => (int) ($this->maker->saves_count ?? 0),
             ] : null,
             'created_at' => $this->created_at?->toISOString(),
