@@ -1,10 +1,12 @@
 <?php
 
 use App\Features\Makers\Http\Controllers\Api\V1\ArtworkIndexController;
+use App\Features\Makers\Http\Controllers\Api\V1\DeleteMyCarouselController;
 use App\Features\Makers\Http\Controllers\Api\V1\IndexController;
 use App\Features\Makers\Http\Controllers\Api\V1\ShowController;
 use App\Features\Makers\Http\Controllers\Api\V1\ShowMyProfileController;
 use App\Features\Makers\Http\Controllers\Api\V1\UpdateMyProfileController;
+use App\Features\Makers\Http\Controllers\Api\V1\UpsertMyCarouselController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/makers', IndexController::class)->name('makers.index');
@@ -14,4 +16,12 @@ Route::get('/makers/{maker}/artworks', ArtworkIndexController::class)->whereNumb
 Route::middleware(['auth:sanctum', 'account.active', 'role:maker'])->group(function (): void {
     Route::get('/me/maker-profile', ShowMyProfileController::class)->name('me.maker-profile.show');
     Route::patch('/me/maker-profile', UpdateMyProfileController::class)->name('me.maker-profile.update');
+
+    Route::post('/me/maker-profile/carousel/{slot}', UpsertMyCarouselController::class)
+        ->where('slot', '[1-3]')
+        ->name('me.maker-profile.carousel.upsert');
+
+    Route::delete('/me/maker-profile/carousel/{slot}', DeleteMyCarouselController::class)
+        ->where('slot', '[1-3]')
+        ->name('me.maker-profile.carousel.destroy');
 });
