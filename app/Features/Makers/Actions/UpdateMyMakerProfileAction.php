@@ -7,39 +7,54 @@ use Illuminate\Support\Facades\DB;
 
 final class UpdateMyMakerProfileAction
 {
-    /** @param array{name?:string|null,bio?:string|null,location_text?:string|null} $data */
+    /** @param array<string, mixed> $data */
     public function execute(User $maker, array $data): User
     {
         return DB::transaction(function () use ($maker, $data): User {
-            if (array_key_exists('name', $data)) {
+            if (array_key_exists('name', $data) && $data['name'] !== null) {
                 $maker->update(['name' => trim((string) $data['name'])]);
             }
 
+            $profile = $maker->makerProfile()->firstOrCreate(['user_id' => $maker->id]);
+
             $profileData = [];
-            foreach (['bio', 'location_text'] as $key) {
-                if (array_key_exists($key, $data)) {
-                    $value = $data[$key];
-                    $profileData[$key] = $value === null ? null : $this->nullableTrim((string) $value);
+
+            foreach (['bio', 'location_text', 'location_id', 'website_url', 'contact_email'] as $key) {
+                if (! array_key_exists($key, $data)) {
+                    continue;
                 }
+
+                $value = $data[$key];
+
+                if (is_string($value)) {
+                    $value = trim($value);
+                    $value = $value === '' ? null : $value;
+                }
+
+                $profileData[$key] = $value;
+            }
+
+            if (($data['complete_onboarding'] ?? false) === true) {
+                $profileData['onboarding_completed_at'] = now();
             }
 
             if ($profileData !== []) {
-                $maker->makerProfile()->updateOrCreate(
-                    ['user_id' => $maker->id],
-                    $profileData,
-                );
-            } else {
-                $maker->makerProfile()->firstOrCreate(['user_id' => $maker->id]);
+                $profile->update($profileData);
             }
 
-            return $maker->refresh()->load('makerProfile');
+            if (array_key_exists('type_ids', $data)) {
+                $profile->types()->sync(array_values($data['type_ids']));
+            }
+
+            if (array_key_exists('style_ids', $data)) {
+                $profile->styles()->sync(array_values($data['style_ids']));
+            }
+
+            return $maker->refresh()->load([
+                'makerProfile.location',
+                'makerProfile.types',
+                'makerProfile.styles',
+            ]);
         });
-    }
-
-    private function nullableTrim(string $value): ?string
-    {
-        $value = trim($value);
-
-        return $value === '' ? null : $value;
     }
 }
