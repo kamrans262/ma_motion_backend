@@ -15,6 +15,7 @@ final class MyMakerProfileResource extends JsonResource
         $location = $profile?->location;
         $types = $profile?->types ?? collect();
         $styles = $profile?->styles ?? collect();
+        $carousel = $profile?->carouselMedia ?? collect();
 
         return [
             'id' => $this->id,
@@ -37,6 +38,9 @@ final class MyMakerProfileResource extends JsonResource
             'profile_image_url' => $profile?->profile_image_path
                 ? Storage::disk('public')->url($profile->profile_image_path)
                 : null,
+            'show_website_on_info_page' => $profile?->show_website_on_info_page ?? true,
+            'show_email_on_info_page' => $profile?->show_email_on_info_page ?? false,
+            'show_shows_on_info_page' => $profile?->show_shows_on_info_page ?? true,
             'types' => $types->map(static fn ($type): array => [
                 'id' => $type->id,
                 'name' => $type->name,
@@ -47,6 +51,7 @@ final class MyMakerProfileResource extends JsonResource
                 'name' => $style->name,
                 'slug' => $style->slug,
             ])->values()->all(),
+            'carousel_content' => MakerProfileCarouselMediaResource::collection($carousel)->resolve($request),
             'onboarding_completed_at' => $profile?->onboarding_completed_at?->toISOString(),
             'onboarding_completed' => $profile?->onboarding_completed_at !== null,
         ];
