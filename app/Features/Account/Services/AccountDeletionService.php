@@ -13,6 +13,16 @@ final class AccountDeletionService
     {
         $profileImagePath = $user->makerProfile?->profile_image_path;
 
+        $profileCarouselFiles = $user->makerProfile
+            ? $user->makerProfile->carouselMedia()
+                ->get(['disk', 'path'])
+                ->map(static fn ($media): array => [
+                    'disk' => $media->disk,
+                    'path' => $media->path,
+                ])
+                ->all()
+            : [];
+
         $mediaFiles = Artwork::query()
             ->withTrashed()
             ->where('maker_id', $user->id)
@@ -27,7 +37,7 @@ final class AccountDeletionService
             $user->delete();
         });
 
-        foreach ($mediaFiles as $mediaFile) {
+        foreach ([...$mediaFiles, ...$profileCarouselFiles] as $mediaFile) {
             Storage::disk($mediaFile['disk'])->delete($mediaFile['path']);
         }
 
