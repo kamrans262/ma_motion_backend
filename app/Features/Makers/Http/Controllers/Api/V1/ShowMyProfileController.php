@@ -16,6 +16,7 @@ final class ShowMyProfileController extends Controller
             'makerProfile.location',
             'makerProfile.types',
             'makerProfile.styles',
+            'makerProfile.carouselMedia',
         ]);
 
         return ApiResponse::success(
