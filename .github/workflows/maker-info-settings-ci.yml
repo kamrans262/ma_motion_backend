@@ -1,0 +1,85 @@
+name: Maker Info Settings Backend CI
+
+on:
+  push:
+    branches:
+      - ci/maker-info-settings
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  laravel-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout module branch
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, fileinfo, pdo_sqlite, sqlite3, gd
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare Laravel environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate --force
+          php artisan config:clear
+
+      - name: PHP syntax gate for module surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            database/migrations/2026_09_12_020000_add_maker_info_settings_and_carousel.php
+            app/Features/Makers/Models/MakerProfile.php
+            app/Features/Makers/Models/MakerProfileCarouselMedia.php
+            app/Features/Makers/Http/Requests/UpdateMyMakerProfileRequest.php
+            app/Features/Makers/Actions/UpdateMyMakerProfileAction.php
+            app/Features/Makers/Http/Resources/MakerProfileCarouselMediaResource.php
+            app/Features/Makers/Http/Resources/MyMakerProfileResource.php
+            app/Features/Makers/Http/Controllers/Api/V1/ShowMyProfileController.php
+            app/Features/Makers/Http/Requests/UpsertMakerProfileCarouselRequest.php
+            app/Features/Makers/Actions/UpsertMakerProfileCarouselAction.php
+            app/Features/Makers/Actions/DeleteMakerProfileCarouselAction.php
+            app/Features/Makers/Http/Controllers/Api/V1/UpsertMyCarouselController.php
+            app/Features/Makers/Http/Controllers/Api/V1/DeleteMyCarouselController.php
+            routes/api/v1/makers.php
+            app/Features/Account/Services/AccountDeletionService.php
+            app/Features/Discovery/Http/Resources/DiscoveryArtworkDetailResource.php
+            tests/Feature/Api/V1/Makers/MakerInfoSettingsApiTest.php
+          )
+          for file in "${files[@]}"; do
+            php -l "$file"
+          done
+
+      - name: Migration round-trip on SQLite
+        shell: bash
+        run: |
+          set -euo pipefail
+          php artisan migrate:fresh --force
+          php artisan migrate:rollback --step=1 --force
+          php artisan migrate --force
+
+      - name: Maker Info Settings API tests
+        run: php artisan test tests/Feature/Api/V1/Makers/MakerInfoSettingsApiTest.php
+
+      - name: Maker onboarding regression
+        run: php artisan test tests/Feature/Api/V1/Makers/MakerOnboardingProfileApiTest.php
+
+      - name: Artwork detail visibility regression
+        run: php artisan test tests/Feature/Api/V1/Discovery/DiscoveryArtworkDetailApiTest.php
+
+      - name: Full Laravel regression
+        run: php artisan test
