@@ -19,7 +19,16 @@ final class UpdateMyMakerProfileAction
 
             $profileData = [];
 
-            foreach (['bio', 'location_text', 'location_id', 'website_url', 'contact_email'] as $key) {
+            foreach ([
+                'bio',
+                'location_text',
+                'location_id',
+                'website_url',
+                'contact_email',
+                'show_website_on_info_page',
+                'show_email_on_info_page',
+                'show_shows_on_info_page',
+            ] as $key) {
                 if (! array_key_exists($key, $data)) {
                     continue;
                 }
@@ -54,6 +63,7 @@ final class UpdateMyMakerProfileAction
                 'makerProfile.location',
                 'makerProfile.types',
                 'makerProfile.styles',
+                'makerProfile.carouselMedia',
             ]);
         });
     }
