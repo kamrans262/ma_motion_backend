@@ -1,0 +1,58 @@
+name: One-time Saved Artwork Formatter
+
+on:
+  push:
+    branches:
+      - ci/saved-artwork-format
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, sqlite, pdo_sqlite, fileinfo
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Format Saved Artwork module
+        run: |
+          vendor/bin/pint \
+            app/Features/Saves/Actions/SaveArtworkAction.php \
+            app/Features/Saves/Actions/UnsaveArtworkAction.php \
+            app/Features/Saves/Http/Controllers/Api/V1/SavedArtworkIndexController.php \
+            app/Features/Saves/Http/Controllers/Api/V1/SavedArtworkStatusController.php \
+            app/Features/Saves/Http/Controllers/Api/V1/SaveArtworkController.php \
+            app/Features/Saves/Http/Controllers/Api/V1/UnsaveArtworkController.php \
+            app/Features/Saves/Http/Requests/SavedArtworkIndexRequest.php \
+            app/Features/Saves/Models/ArtworkSave.php \
+            app/Features/Saves/Services/SavedArtworkService.php \
+            database/migrations/2026_09_12_080000_create_artwork_saves_table.php \
+            routes/api/v1/saves.php \
+            tests/Feature/Api/V1/Saves/SavedArtworkApiTest.php
+
+      - name: Commit formatter output when needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No formatting changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/Features/Saves database/migrations/2026_09_12_080000_create_artwork_saves_table.php routes/api/v1/saves.php tests/Feature/Api/V1/Saves/SavedArtworkApiTest.php
+          git commit -m "style: format saved artwork module"
+          git push origin HEAD:ci/saved-artwork-format
