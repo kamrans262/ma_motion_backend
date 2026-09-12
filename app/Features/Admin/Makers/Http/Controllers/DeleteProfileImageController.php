@@ -14,7 +14,7 @@ final class DeleteProfileImageController extends Controller
     public function __invoke(User $maker, DeleteMakerProfileImageAction $action): RedirectResponse
     {
         if (! $maker->hasRole(UserRole::Maker)) {
-            throw (new ModelNotFoundException())->setModel(User::class, [$maker->getKey()]);
+            throw (new ModelNotFoundException)->setModel(User::class, [$maker->getKey()]);
         }
 
         $action->execute($maker);

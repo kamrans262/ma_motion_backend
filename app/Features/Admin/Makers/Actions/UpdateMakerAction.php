@@ -15,7 +15,7 @@ final class UpdateMakerAction
     public function execute(User $maker, array $data): User
     {
         if (! $maker->hasRole(UserRole::Maker)) {
-            throw (new ModelNotFoundException())->setModel(User::class, [$maker->getKey()]);
+            throw (new ModelNotFoundException)->setModel(User::class, [$maker->getKey()]);
         }
 
         return DB::transaction(function () use ($maker, $data): User {
@@ -60,8 +60,11 @@ final class UpdateMakerAction
 
     private function nullableTrim(?string $value): ?string
     {
-        if ($value === null) return null;
+        if ($value === null) {
+            return null;
+        }
         $value = trim($value);
+
         return $value === '' ? null : $value;
     }
 }

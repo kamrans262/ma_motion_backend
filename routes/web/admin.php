@@ -2,9 +2,6 @@
 
 use App\Features\Admin\Analytics\Http\Controllers\ExportController as AnalyticsExportController;
 use App\Features\Admin\Analytics\Http\Controllers\IndexController as AnalyticsIndexController;
-use App\Features\Admin\Audit\Http\Controllers\ExportController as AuditLogExportController;
-use App\Features\Admin\Audit\Http\Controllers\IndexController as AuditLogIndexController;
-use App\Features\Admin\Audit\Http\Middleware\LogAdminActivity;
 use App\Features\Admin\Artworks\Http\Controllers\DestroyController as ArtworkDestroyController;
 use App\Features\Admin\Artworks\Http\Controllers\DestroyMediaController as ArtworkDestroyMediaController;
 use App\Features\Admin\Artworks\Http\Controllers\IndexController as ArtworkIndexController;
@@ -13,6 +10,15 @@ use App\Features\Admin\Artworks\Http\Controllers\SetPrimaryMediaController as Ar
 use App\Features\Admin\Artworks\Http\Controllers\ShowController as ArtworkShowController;
 use App\Features\Admin\Artworks\Http\Controllers\ToggleVisibilityController as ArtworkToggleVisibilityController;
 use App\Features\Admin\Artworks\Http\Controllers\UpdateController as ArtworkUpdateController;
+use App\Features\Admin\Audit\Http\Controllers\ExportController as AuditLogExportController;
+use App\Features\Admin\Audit\Http\Controllers\IndexController as AuditLogIndexController;
+use App\Features\Admin\Audit\Http\Middleware\LogAdminActivity;
+use App\Features\Admin\Content\Http\Controllers\DestroyController as ContentDestroyController;
+use App\Features\Admin\Content\Http\Controllers\EditController as ContentEditController;
+use App\Features\Admin\Content\Http\Controllers\IndexController as ContentIndexController;
+use App\Features\Admin\Content\Http\Controllers\StoreController as ContentStoreController;
+use App\Features\Admin\Content\Http\Controllers\TogglePublishController as ContentTogglePublishController;
+use App\Features\Admin\Content\Http\Controllers\UpdateController as ContentUpdateController;
 use App\Features\Admin\FeaturedMaker\Http\Controllers\DestroyController as FeaturedMakerDestroyController;
 use App\Features\Admin\FeaturedMaker\Http\Controllers\IndexController as FeaturedMakerIndexController;
 use App\Features\Admin\FeaturedMaker\Http\Controllers\UpdateController as FeaturedMakerUpdateController;
@@ -25,7 +31,6 @@ use App\Features\Admin\Locations\Http\Controllers\IndexController as LocationInd
 use App\Features\Admin\Locations\Http\Controllers\StoreController as LocationStoreController;
 use App\Features\Admin\Locations\Http\Controllers\ToggleStatusController as LocationToggleStatusController;
 use App\Features\Admin\Locations\Http\Controllers\UpdateController as LocationUpdateController;
-use App\Features\Admin\Notifications\Http\Controllers\IndexController as NotificationIndexController;
 use App\Features\Admin\Makers\Http\Controllers\DeleteContentController as MakerDeleteContentController;
 use App\Features\Admin\Makers\Http\Controllers\DeleteProfileImageController as MakerDeleteProfileImageController;
 use App\Features\Admin\Makers\Http\Controllers\IndexController as MakerIndexController;
@@ -33,7 +38,11 @@ use App\Features\Admin\Makers\Http\Controllers\SaveContentController as MakerSav
 use App\Features\Admin\Makers\Http\Controllers\ShowController as MakerShowController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateController as MakerUpdateController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateProfileImageController as MakerUpdateProfileImageController;
+use App\Features\Admin\Notifications\Http\Controllers\IndexController as NotificationIndexController;
 use App\Features\Admin\Saves\Http\Controllers\IndexController as SaveIndexController;
+use App\Features\Admin\Settings\Http\Controllers\ChangePasswordController as AdminSettingsChangePasswordController;
+use App\Features\Admin\Settings\Http\Controllers\IndexController as AdminSettingsIndexController;
+use App\Features\Admin\Settings\Http\Controllers\UpdateProfileController as AdminSettingsUpdateProfileController;
 use App\Features\Admin\Shows\Http\Controllers\DestroyController as ShowDestroyController;
 use App\Features\Admin\Shows\Http\Controllers\IndexController as ShowIndexController;
 use App\Features\Admin\Shows\Http\Controllers\ShowController as AdminShowController;
@@ -56,15 +65,6 @@ use App\Features\Admin\Users\Http\Controllers\DestroyController as UserDestroyCo
 use App\Features\Admin\Users\Http\Controllers\IndexController as UserIndexController;
 use App\Features\Admin\Users\Http\Controllers\ShowController as UserShowController;
 use App\Features\Admin\Users\Http\Controllers\UpdateController as UserUpdateController;
-use App\Features\Admin\Content\Http\Controllers\DestroyController as ContentDestroyController;
-use App\Features\Admin\Content\Http\Controllers\EditController as ContentEditController;
-use App\Features\Admin\Content\Http\Controllers\IndexController as ContentIndexController;
-use App\Features\Admin\Content\Http\Controllers\StoreController as ContentStoreController;
-use App\Features\Admin\Content\Http\Controllers\TogglePublishController as ContentTogglePublishController;
-use App\Features\Admin\Content\Http\Controllers\UpdateController as ContentUpdateController;
-use App\Features\Admin\Settings\Http\Controllers\ChangePasswordController as AdminSettingsChangePasswordController;
-use App\Features\Admin\Settings\Http\Controllers\IndexController as AdminSettingsIndexController;
-use App\Features\Admin\Settings\Http\Controllers\UpdateProfileController as AdminSettingsUpdateProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
@@ -158,7 +158,6 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::patch('/{location}/status', LocationToggleStatusController::class)->whereNumber('location')->name('toggle-status');
             Route::delete('/{location}', LocationDestroyController::class)->whereNumber('location')->name('destroy');
         });
-
 
         Route::prefix('content')->name('content.')->group(function (): void {
             Route::get('/', ContentIndexController::class)->name('index');
