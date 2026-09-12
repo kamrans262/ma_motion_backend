@@ -2,9 +2,9 @@
 
 namespace App\Features\Admin\Makers\Http\Controllers;
 
+use App\Features\Auth\Enums\UserRole;
 use App\Features\Makers\Actions\SaveMakerProfileContentAction;
 use App\Features\Makers\Http\Requests\SaveMakerProfileContentRequest;
-use App\Features\Auth\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -19,7 +19,7 @@ final class SaveContentController extends Controller
         SaveMakerProfileContentAction $action,
     ): RedirectResponse {
         if (! $maker->hasRole(UserRole::Maker)) {
-            throw (new ModelNotFoundException())->setModel(User::class, [$maker->getKey()]);
+            throw (new ModelNotFoundException)->setModel(User::class, [$maker->getKey()]);
         }
 
         $action->execute(
