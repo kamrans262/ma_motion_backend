@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 final class UpdateMakerAction
 {
-    /** @param array{name:string,email:string,status:string,bio?:string|null,location_text?:string|null,location_id?:int|null,website_url?:string|null,contact_email?:string|null,show_website_on_info_page:bool,show_email_on_info_page:bool,show_shows_on_info_page:bool} $data */
+    /** @param array{name:string,email:string,status:string,bio?:string|null,location_text?:string|null,location_id?:int|null,website_url?:string|null,contact_email?:string|null,show_website_on_info_page?:bool,show_email_on_info_page?:bool,show_shows_on_info_page?:bool} $data */
     public function execute(User $maker, array $data): User
     {
         if (! $maker->hasRole(UserRole::Maker)) {
@@ -35,9 +35,15 @@ final class UpdateMakerAction
                     'location_id' => $data['location_id'] ?? null,
                     'website_url' => $this->nullableTrim($data['website_url'] ?? null),
                     'contact_email' => $this->nullableTrim($data['contact_email'] ?? null),
-                    'show_website_on_info_page' => (bool) $data['show_website_on_info_page'],
-                    'show_email_on_info_page' => (bool) $data['show_email_on_info_page'],
-                    'show_shows_on_info_page' => (bool) $data['show_shows_on_info_page'],
+                    'show_website_on_info_page' => array_key_exists('show_website_on_info_page', $data)
+                        ? (bool) $data['show_website_on_info_page']
+                        : ($maker->makerProfile?->show_website_on_info_page ?? true),
+                    'show_email_on_info_page' => array_key_exists('show_email_on_info_page', $data)
+                        ? (bool) $data['show_email_on_info_page']
+                        : ($maker->makerProfile?->show_email_on_info_page ?? false),
+                    'show_shows_on_info_page' => array_key_exists('show_shows_on_info_page', $data)
+                        ? (bool) $data['show_shows_on_info_page']
+                        : ($maker->makerProfile?->show_shows_on_info_page ?? true),
                 ],
             );
 
