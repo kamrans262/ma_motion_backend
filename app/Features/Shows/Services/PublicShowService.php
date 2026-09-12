@@ -45,6 +45,9 @@ final class PublicShowService
         return User::query()
             ->where('role', UserRole::Maker->value)
             ->where('status', UserStatus::Active->value)
+            ->whereHas('makerProfile', static function ($profileQuery): void {
+                $profileQuery->where('show_shows_on_info_page', true);
+            })
             ->findOrFail($makerId);
     }
 
