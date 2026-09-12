@@ -3,8 +3,8 @@
 use App\Features\Makers\Http\Controllers\Api\V1\ArtworkIndexController;
 use App\Features\Makers\Http\Controllers\Api\V1\DeleteProfileContentController;
 use App\Features\Makers\Http\Controllers\Api\V1\IndexController;
-use App\Features\Makers\Http\Controllers\Api\V1\ShowController;
 use App\Features\Makers\Http\Controllers\Api\V1\SaveProfileContentController;
+use App\Features\Makers\Http\Controllers\Api\V1\ShowController;
 use App\Features\Makers\Http\Controllers\Api\V1\ShowMyProfileController;
 use App\Features\Makers\Http\Controllers\Api\V1\UpdateMyProfileController;
 use Illuminate\Support\Facades\Route;

@@ -12,7 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 final class PublicShowService
 {
     /**
-     * @param array{status?:string|null,per_page?:int|null} $filters
+     * @param  array{status?:string|null,per_page?:int|null}  $filters
      * @return LengthAwarePaginator<int, Show>
      */
     public function paginateForMaker(int $makerId, array $filters): LengthAwarePaginator
