@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 final class SavedArtworkService
 {
     /**
-     * @param array{per_page?:int|null,page?:int|null} $filters
+     * @param  array{per_page?:int|null,page?:int|null}  $filters
      * @return LengthAwarePaginator<int, Artwork>
      */
     public function paginate(User $user, array $filters): LengthAwarePaginator
