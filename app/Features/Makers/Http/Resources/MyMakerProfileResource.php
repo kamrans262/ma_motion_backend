@@ -34,6 +34,12 @@ final class MyMakerProfileResource extends JsonResource
             ] : null,
             'website_url' => $profile?->website_url,
             'contact_email' => $profile?->contact_email,
+            'show_website_on_info_page' => $profile?->show_website_on_info_page ?? true,
+            'show_email_on_info_page' => $profile?->show_email_on_info_page ?? false,
+            'show_shows_on_info_page' => $profile?->show_shows_on_info_page ?? true,
+            'carousel_content' => $profile
+                ? MakerProfileContentResource::collection($profile->contents)->resolve($request)
+                : [],
             'profile_image_url' => $profile?->profile_image_path
                 ? Storage::disk('public')->url($profile->profile_image_path)
                 : null,
