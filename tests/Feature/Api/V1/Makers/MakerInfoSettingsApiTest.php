@@ -117,20 +117,25 @@ final class MakerInfoSettingsApiTest extends TestCase
         Storage::disk('public')->assertMissing($replacementPath);
     }
 
-    public function test_content_slot_requires_media_when_empty_and_appreciator_cannot_manage_content(): void
+    public function test_content_slot_requires_media_when_empty(): void
     {
         $maker = User::factory()->create([
             'role' => UserRole::Maker,
             'status' => UserStatus::Active,
         ]);
-        $makerToken = $maker->createToken('mobile', ['mobile'])->plainTextToken;
+        $token = $maker->createToken('mobile', ['mobile'])->plainTextToken;
 
-        $this->withToken($makerToken)
+        $this->withToken($token)
             ->postJson('/api/v1/me/maker-profile/carousel/3', [
                 'caption' => 'Missing media',
             ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('media');
+    }
+
+    public function test_appreciator_cannot_manage_maker_profile_content(): void
+    {
+        Storage::fake('public');
 
         $appreciator = User::factory()->create([
             'role' => UserRole::Appreciator,
@@ -142,7 +147,8 @@ final class MakerInfoSettingsApiTest extends TestCase
             ->post('/api/v1/me/maker-profile/carousel/1', [
                 'media' => UploadedFile::fake()->image('not-allowed.jpg'),
             ], ['Accept' => 'application/json'])
-            ->assertForbidden();
+            ->assertForbidden()
+            ->assertJsonPath('message', 'You are not authorized to perform this action.');
     }
 
     public function test_artwork_detail_enforces_website_email_and_show_privacy(): void
