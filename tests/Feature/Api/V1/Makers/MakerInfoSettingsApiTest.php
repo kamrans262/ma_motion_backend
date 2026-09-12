@@ -139,7 +139,9 @@ final class MakerInfoSettingsApiTest extends TestCase
         $token = $appreciator->createToken('mobile', ['mobile'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson('/api/v1/me/maker-profile/carousel/1', [])
+            ->post('/api/v1/me/maker-profile/carousel/1', [
+                'media' => UploadedFile::fake()->image('not-allowed.jpg'),
+            ], ['Accept' => 'application/json'])
             ->assertForbidden();
     }
 
