@@ -2,8 +2,8 @@
 
 use App\Features\Auth\Http\Controllers\Api\V1\ForgotPasswordController;
 use App\Features\Auth\Http\Controllers\Api\V1\LoginController;
-use App\Features\Auth\Http\Controllers\Api\V1\MakerOnboardingRegisterController;
 use App\Features\Auth\Http\Controllers\Api\V1\LogoutController;
+use App\Features\Auth\Http\Controllers\Api\V1\MakerOnboardingRegisterController;
 use App\Features\Auth\Http\Controllers\Api\V1\MeController;
 use App\Features\Auth\Http\Controllers\Api\V1\RegisterController;
 use App\Features\Auth\Http\Controllers\Api\V1\ResetPasswordController;
