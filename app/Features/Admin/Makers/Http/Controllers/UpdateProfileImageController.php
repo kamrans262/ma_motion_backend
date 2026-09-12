@@ -18,7 +18,7 @@ final class UpdateProfileImageController extends Controller
         UpdateMakerProfileImageAction $action,
     ): RedirectResponse {
         if (! $maker->hasRole(UserRole::Maker)) {
-            throw (new ModelNotFoundException())->setModel(User::class, [$maker->getKey()]);
+            throw (new ModelNotFoundException)->setModel(User::class, [$maker->getKey()]);
         }
 
         $action->execute($maker, $request->file('image'));
