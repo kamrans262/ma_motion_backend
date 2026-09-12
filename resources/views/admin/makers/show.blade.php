@@ -81,7 +81,7 @@
         <article class="ma-artwork-media-card">
             <div class="ma-artwork-media-card__visual">
                 @if ($maker->makerProfile?->profile_image_path)
-                    <img src="{{ IlluminateSupportFacadesStorage::disk('public')->url($maker->makerProfile->profile_image_path) }}" alt="{{ $maker->name }} salon image">
+                    <img src="{{ asset('storage/'.$maker->makerProfile->profile_image_path) }}" alt="{{ $maker->name }} salon image">
                 @else
                     <div class="ma-artwork-thumb--placeholder">No salon image uploaded</div>
                 @endif
@@ -118,10 +118,10 @@
                     @if ($content)
                         @if ($content->kind === 'video')
                             <video controls preload="metadata" style="width:100%;height:100%;object-fit:cover">
-                                <source src="{{ IlluminateSupportFacadesStorage::disk('public')->url($content->path) }}" type="{{ $content->mime_type }}">
+                                <source src="{{ asset('storage/'.$content->path) }}" type="{{ $content->mime_type }}">
                             </video>
                         @else
-                            <img src="{{ IlluminateSupportFacadesStorage::disk('public')->url($content->path) }}" alt="Content {{ $slot }}">
+                            <img src="{{ asset('storage/'.$content->path) }}" alt="Content {{ $slot }}">
                         @endif
                     @else
                         <div class="ma-artwork-thumb--placeholder">Content {{ $slot }} not uploaded</div>
