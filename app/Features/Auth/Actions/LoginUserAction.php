@@ -16,7 +16,7 @@ final class LoginUserAction
     {
         $user = User::query()->where('email', $email)->first();
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user || ! is_string($user->password) || $user->password === '' || ! Hash::check($password, $user->password)) {
             throw new InvalidCredentialsException();
         }
 
