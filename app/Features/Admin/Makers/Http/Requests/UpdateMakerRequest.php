@@ -22,6 +22,11 @@ final class UpdateMakerRequest extends FormRequest
             'bio' => ['nullable', 'string', 'max:5000'],
             'location_text' => ['nullable', 'string', 'max:180'],
             'location_id' => ['nullable', 'integer', Rule::exists('locations', 'id')->whereNull('deleted_at')],
+            'website_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'contact_email' => ['nullable', 'email:rfc', 'max:255'],
+            'show_website_on_info_page' => ['required', 'boolean'],
+            'show_email_on_info_page' => ['required', 'boolean'],
+            'show_shows_on_info_page' => ['required', 'boolean'],
         ];
     }
 }
