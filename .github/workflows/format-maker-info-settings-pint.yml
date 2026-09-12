@@ -1,0 +1,66 @@
+name: One-time Maker Info Settings Pint
+
+on:
+  push:
+    branches:
+      - ci/maker-info-settings-pint
+
+permissions:
+  contents: write
+
+jobs:
+  pint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, fileinfo
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Format Maker info settings surface
+        run: |
+          vendor/bin/pint \
+            app/Features/Makers/Models/MakerProfile.php \
+            app/Features/Makers/Models/MakerProfileContent.php \
+            app/Features/Makers/Actions/UpdateMyMakerProfileAction.php \
+            app/Features/Makers/Actions/SaveMakerProfileContentAction.php \
+            app/Features/Makers/Actions/DeleteMakerProfileContentAction.php \
+            app/Features/Makers/Http/Controllers/Api/V1/SaveProfileContentController.php \
+            app/Features/Makers/Http/Controllers/Api/V1/DeleteProfileContentController.php \
+            app/Features/Makers/Http/Requests/UpdateMyMakerProfileRequest.php \
+            app/Features/Makers/Http/Requests/SaveMakerProfileContentRequest.php \
+            app/Features/Makers/Http/Resources/MyMakerProfileResource.php \
+            app/Features/Makers/Http/Resources/MakerProfileContentResource.php \
+            app/Features/Discovery/Http/Resources/DiscoveryArtworkDetailResource.php \
+            app/Features/Shows/Services/PublicShowService.php \
+            app/Features/Admin/Makers/Actions/UpdateMakerAction.php \
+            app/Features/Admin/Makers/Http/Controllers/UpdateProfileImageController.php \
+            app/Features/Admin/Makers/Http/Controllers/DeleteProfileImageController.php \
+            app/Features/Admin/Makers/Http/Controllers/SaveContentController.php \
+            app/Features/Admin/Makers/Http/Controllers/DeleteContentController.php \
+            app/Features/Admin/Makers/Http/Controllers/ShowController.php \
+            app/Features/Admin/Makers/Http/Requests/UpdateMakerRequest.php \
+            database/migrations/2026_09_13_000000_add_maker_info_settings_and_contents.php \
+            routes/api/v1/makers.php \
+            routes/web/admin.php \
+            tests/Feature/Api/V1/Makers/MakerInfoSettingsApiTest.php \
+            tests/Feature/Admin/AdminMakerManagementTest.php
+      - name: Commit formatter output
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app database routes tests
+          git commit -m "style: format Maker info settings backend"
+          git push origin HEAD:ci/maker-info-settings-pint
