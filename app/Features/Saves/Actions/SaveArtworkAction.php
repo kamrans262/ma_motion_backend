@@ -31,7 +31,7 @@ final class SaveArtworkAction
             ->exists();
 
         if ($isPublicArtwork === false) {
-            $exception = new ModelNotFoundException();
+            $exception = new ModelNotFoundException;
             $exception->setModel(Artwork::class, [$artwork->getKey()]);
 
             throw $exception;
