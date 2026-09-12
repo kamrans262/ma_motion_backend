@@ -26,9 +26,13 @@ use App\Features\Admin\Locations\Http\Controllers\StoreController as LocationSto
 use App\Features\Admin\Locations\Http\Controllers\ToggleStatusController as LocationToggleStatusController;
 use App\Features\Admin\Locations\Http\Controllers\UpdateController as LocationUpdateController;
 use App\Features\Admin\Notifications\Http\Controllers\IndexController as NotificationIndexController;
+use App\Features\Admin\Makers\Http\Controllers\DeleteContentController as MakerDeleteContentController;
+use App\Features\Admin\Makers\Http\Controllers\DeleteProfileImageController as MakerDeleteProfileImageController;
 use App\Features\Admin\Makers\Http\Controllers\IndexController as MakerIndexController;
+use App\Features\Admin\Makers\Http\Controllers\SaveContentController as MakerSaveContentController;
 use App\Features\Admin\Makers\Http\Controllers\ShowController as MakerShowController;
 use App\Features\Admin\Makers\Http\Controllers\UpdateController as MakerUpdateController;
+use App\Features\Admin\Makers\Http\Controllers\UpdateProfileImageController as MakerUpdateProfileImageController;
 use App\Features\Admin\Saves\Http\Controllers\IndexController as SaveIndexController;
 use App\Features\Admin\Shows\Http\Controllers\DestroyController as ShowDestroyController;
 use App\Features\Admin\Shows\Http\Controllers\IndexController as ShowIndexController;
@@ -91,6 +95,12 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::get('/', MakerIndexController::class)->name('index');
             Route::get('/{maker}', MakerShowController::class)->whereNumber('maker')->name('show');
             Route::put('/{maker}', MakerUpdateController::class)->whereNumber('maker')->name('update');
+            Route::post('/{maker}/profile-image', MakerUpdateProfileImageController::class)->whereNumber('maker')->name('profile-image.update');
+            Route::delete('/{maker}/profile-image', MakerDeleteProfileImageController::class)->whereNumber('maker')->name('profile-image.destroy');
+            Route::post('/{maker}/content/{slot}', MakerSaveContentController::class)
+                ->whereNumber('maker')->whereIn('slot', ['1', '2', '3'])->name('content.store');
+            Route::delete('/{maker}/content/{slot}', MakerDeleteContentController::class)
+                ->whereNumber('maker')->whereIn('slot', ['1', '2', '3'])->name('content.destroy');
         });
 
         Route::get('/saves', SaveIndexController::class)->name('saves.index');
