@@ -62,6 +62,20 @@ class MakerOnboardingRegistrationApiTest extends TestCase
             ->assertJsonPath('data.onboarding_completed', false);
     }
 
+    public function test_passwordless_maker_cannot_use_password_login_endpoint(): void
+    {
+        $this->postJson('/api/v1/auth/maker-onboarding', [
+            'name' => 'Artist Ken',
+            'email' => 'artist@example.com',
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'artist@example.com',
+            'password' => 'Anything123',
+        ])->assertUnauthorized()
+            ->assertJsonPath('message', 'Invalid email or password.');
+    }
+
     public function test_maker_onboarding_rejects_duplicate_email(): void
     {
         $payload = [
