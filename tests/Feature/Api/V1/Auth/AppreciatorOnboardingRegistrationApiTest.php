@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1\Auth;
 
+use App\Features\Appreciators\Models\AppreciatorProfile;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Locations\Models\Location;
@@ -58,7 +59,7 @@ class AppreciatorOnboardingRegistrationApiTest extends TestCase
         ]);
 
         $this->assertNotNull(
-            \App\Features\Appreciators\Models\AppreciatorProfile::query()
+            AppreciatorProfile::query()
                 ->where('user_id', 1)
                 ->value('onboarding_completed_at'),
         );
