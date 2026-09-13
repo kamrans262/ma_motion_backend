@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Features\Appreciators\Models\AppreciatorProfile;
 use App\Features\Artworks\Models\Artwork;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
@@ -62,6 +63,12 @@ class User extends Authenticatable
     public function makerProfile(): HasOne
     {
         return $this->hasOne(MakerProfile::class);
+    }
+
+    /** @return HasOne<AppreciatorProfile, $this> */
+    public function appreciatorProfile(): HasOne
+    {
+        return $this->hasOne(AppreciatorProfile::class);
     }
 
     /** @return HasMany<Artwork, $this> */
