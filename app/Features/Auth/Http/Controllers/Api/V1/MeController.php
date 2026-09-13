@@ -12,8 +12,10 @@ final class MeController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
+        $user = $request->user()->loadMissing(['makerProfile', 'appreciatorProfile']);
+
         return ApiResponse::success(
-            data: UserResource::make($request->user())->resolve($request),
+            data: UserResource::make($user)->resolve($request),
             message: 'Authenticated user retrieved successfully.',
         );
     }
