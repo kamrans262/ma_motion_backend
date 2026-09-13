@@ -63,6 +63,9 @@
             <div><dt>Role</dt><dd>{{ ucfirst($user->role->value) }}</dd></div>
             <div><dt>Status</dt><dd>{{ ucfirst($user->status->value) }}</dd></div>
             <div><dt>Email verified</dt><dd>{{ $user->email_verified_at ? 'Yes' : 'No' }}</dd></div>
+            @if ($user->role->value === 'appreciator')
+                <div><dt>Location</dt><dd>{{ $user->appreciatorProfile?->location_text ?? 'Not set' }}</dd></div>
+            @endif
             <div><dt>Last login</dt><dd>{{ $user->last_login_at?->format('M j, Y g:i A') ?? 'Never' }}</dd></div>
             <div><dt>Joined</dt><dd>{{ $user->created_at?->format('M j, Y g:i A') }}</dd></div>
         </dl>
@@ -86,4 +89,47 @@
         </div>
     </aside>
 </div>
+
+@if ($user->role->value === 'appreciator')
+<section class="ma-panel">
+    <div class="ma-panel__header">
+        <div>
+            <p class="ma-eyebrow">Saved Artwork</p>
+            <h3>Saved artworks</h3>
+        </div>
+        <span class="ma-panel__meta">{{ number_format($user->savedArtworks->count()) }} saved</span>
+    </div>
+
+    @if ($user->savedArtworks->isEmpty())
+        <div class="ma-empty-state ma-empty-state--compact">
+            <span class="ma-empty-state__icon" aria-hidden="true">◇</span>
+            <h4>No saved artwork</h4>
+            <p>This Appreciator has not saved any artwork yet.</p>
+        </div>
+    @else
+        <div class="ma-table-wrap">
+            <table class="ma-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Artwork</th>
+                        <th scope="col">Maker</th>
+                        <th scope="col">Saved at</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($user->savedArtworks->sortByDesc(fn ($artwork) => $artwork->pivot?->created_at) as $artwork)
+                        <tr>
+                            <td data-label="Artwork"><strong>{{ $artwork->title }}</strong></td>
+                            <td data-label="Maker">{{ $artwork->maker?->name ?? 'Unknown' }}</td>
+                            <td data-label="Saved at">{{ $artwork->pivot?->created_at?->format('M j, Y g:i A') ?? '—' }}</td>
+                            <td data-label="Action"><a class="ma-text-link" href="{{ route('admin.artworks.show', $artwork) }}">Manage</a></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endif
+</section>
+@endif
 @endsection
