@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Features\Appreciators\Models\AppreciatorProfile;
+use App\Features\Artworks\Models\Artwork;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
+use App\Features\Saves\Models\ArtworkSave;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -81,5 +84,48 @@ class AdminUserManagementTest extends TestCase
             ->assertRedirect('/admin/users/'.$otherAdmin->id)
             ->assertSessionHasErrors('user');
         $this->assertDatabaseHas('users', ['id' => $otherAdmin->id]);
+    }
+
+    public function test_admin_appreciator_view_shows_location_and_saved_artwork(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin, 'status' => UserStatus::Active]);
+        $appreciator = User::factory()->create([
+            'name' => 'Appreciator Viewer',
+            'email' => 'viewer@example.com',
+            'role' => UserRole::Appreciator,
+            'status' => UserStatus::Active,
+        ]);
+        $maker = User::factory()->create([
+            'name' => 'Saved Maker',
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+
+        AppreciatorProfile::query()->create([
+            'user_id' => $appreciator->id,
+            'location_text' => 'Chicago, IL',
+            'onboarding_completed_at' => now(),
+        ]);
+
+        $artwork = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Saved Canvas',
+        ]);
+
+        ArtworkSave::query()->create([
+            'user_id' => $appreciator->id,
+            'artwork_id' => $artwork->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/users/'.$appreciator->id)
+            ->assertOk()
+            ->assertSee('Appreciator Viewer')
+            ->assertSee('viewer@example.com')
+            ->assertSee('Chicago, IL')
+            ->assertSee('Saved artworks')
+            ->assertSee('Saved Canvas')
+            ->assertSee('Saved Maker')
+            ->assertSee(route('admin.artworks.show', $artwork), false);
     }
 }
