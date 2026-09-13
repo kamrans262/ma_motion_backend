@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 final class CompleteAppreciatorExperienceOnboardingAction
 {
     /**
-     * @param array{name:string,email:string,location_text:string,location_id?:int|null} $data
+     * @param  array{name:string,email:string,location_text:string,location_id?:int|null}  $data
      */
     public function execute(User $user, array $data): User
     {
