@@ -90,6 +90,13 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    /** @return BelongsToMany<Artwork, $this> */
+    public function savedArtworks(): BelongsToMany
+    {
+        return $this->belongsToMany(Artwork::class, 'artwork_saves', 'user_id', 'artwork_id')
+            ->withTimestamps();
+    }
+
     /** @return BelongsToMany<User, $this> */
     public function savedByAppreciators(): BelongsToMany
     {
