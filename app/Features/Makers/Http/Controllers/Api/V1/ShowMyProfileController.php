@@ -17,6 +17,11 @@ final class ShowMyProfileController extends Controller
             'makerProfile.types',
             'makerProfile.styles',
             'makerProfile.contents',
+            'makerProfile.artworkSlots.artwork.maker',
+            'makerProfile.artworkSlots.artwork.type',
+            'makerProfile.artworkSlots.artwork.style',
+            'makerProfile.artworkSlots.artwork.location',
+            'makerProfile.artworkSlots.artwork.media',
         ]);
 
         return ApiResponse::success(

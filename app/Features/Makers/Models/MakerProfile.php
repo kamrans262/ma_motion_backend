@@ -66,6 +66,12 @@ final class MakerProfile extends Model
         return $this->hasMany(MakerProfileContent::class)->orderBy('slot');
     }
 
+    /** @return HasMany<MakerProfileArtworkSlot, $this> */
+    public function artworkSlots(): HasMany
+    {
+        return $this->hasMany(MakerProfileArtworkSlot::class)->orderBy('slot');
+    }
+
     /** @return BelongsToMany<ArtworkStyle, $this> */
     public function styles(): BelongsToMany
     {

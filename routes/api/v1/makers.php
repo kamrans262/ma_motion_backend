@@ -1,6 +1,8 @@
 <?php
 
 use App\Features\Makers\Http\Controllers\Api\V1\ArtworkIndexController;
+use App\Features\Makers\Http\Controllers\Api\V1\AssignArtworkSlotController;
+use App\Features\Makers\Http\Controllers\Api\V1\DeleteArtworkSlotController;
 use App\Features\Makers\Http\Controllers\Api\V1\DeleteProfileContentController;
 use App\Features\Makers\Http\Controllers\Api\V1\IndexController;
 use App\Features\Makers\Http\Controllers\Api\V1\SaveProfileContentController;
@@ -22,4 +24,11 @@ Route::middleware(['auth:sanctum', 'account.active', 'role:maker'])->group(funct
     Route::delete('/me/maker-profile/carousel/{slot}', DeleteProfileContentController::class)
         ->whereIn('slot', ['1', '2', '3'])
         ->name('me.maker-profile.carousel.destroy');
+
+    Route::put('/me/maker-profile/artwork-slots/{slot}', AssignArtworkSlotController::class)
+        ->whereIn('slot', ['2', '3', '4'])
+        ->name('me.maker-profile.artwork-slots.assign');
+    Route::delete('/me/maker-profile/artwork-slots/{slot}', DeleteArtworkSlotController::class)
+        ->whereIn('slot', ['2', '3', '4'])
+        ->name('me.maker-profile.artwork-slots.destroy');
 });

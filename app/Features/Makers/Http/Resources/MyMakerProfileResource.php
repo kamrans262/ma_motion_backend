@@ -38,7 +38,12 @@ final class MyMakerProfileResource extends JsonResource
             'show_email_on_info_page' => $profile?->show_email_on_info_page ?? false,
             'show_shows_on_info_page' => $profile?->show_shows_on_info_page ?? true,
             'carousel_content' => $profile
-                ? MakerProfileContentResource::collection($profile->contents)->resolve($request)
+                ? MakerProfileContentResource::collection(
+                    $profile->contents->where('slot', 1)->values(),
+                )->resolve($request)
+                : [],
+            'artwork_slots' => $profile
+                ? MakerProfileArtworkSlotResource::collection($profile->artworkSlots)->resolve($request)
                 : [],
             'profile_image_url' => $profile?->profile_image_path
                 ? Storage::disk('public')->url($profile->profile_image_path)
