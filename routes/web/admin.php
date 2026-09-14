@@ -98,9 +98,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
             Route::post('/{maker}/profile-image', MakerUpdateProfileImageController::class)->whereNumber('maker')->name('profile-image.update');
             Route::delete('/{maker}/profile-image', MakerDeleteProfileImageController::class)->whereNumber('maker')->name('profile-image.destroy');
             Route::post('/{maker}/content/{slot}', MakerSaveContentController::class)
-                ->whereNumber('maker')->whereIn('slot', ['1', '2', '3'])->name('content.store');
+                ->whereNumber('maker')->whereIn('slot', ['1'])->name('content.store');
             Route::delete('/{maker}/content/{slot}', MakerDeleteContentController::class)
-                ->whereNumber('maker')->whereIn('slot', ['1', '2', '3'])->name('content.destroy');
+                ->whereNumber('maker')->whereIn('slot', ['1'])->name('content.destroy');
         });
 
         Route::get('/saves', SaveIndexController::class)->name('saves.index');

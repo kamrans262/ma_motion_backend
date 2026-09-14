@@ -107,52 +107,84 @@
 
 <section class="ma-panel ma-artwork-media-panel">
     <div class="ma-panel__header">
-        <div><p class="ma-eyebrow">Maker Content</p><h3>Content 1 / 2 / 3</h3></div>
+        <div>
+            <p class="ma-eyebrow">Maker Info Content</p>
+            <h3>Salon content & featured artwork</h3>
+        </div>
+        <span class="ma-panel__meta">Content 1 + Artwork 2 / 3 / 4</span>
     </div>
 
+    @php($salonContent = $maker->makerProfile?->contents?->firstWhere('slot', 1))
+
     <div class="ma-artwork-media-grid">
-        @for ($slot = 1; $slot <= 3; $slot++)
-            @php($content = $maker->makerProfile?->contents?->firstWhere('slot', $slot))
+        <article class="ma-artwork-media-card">
+            <div class="ma-artwork-media-card__visual">
+                @if ($salonContent)
+                    @if ($salonContent->kind === 'video')
+                        <video controls preload="metadata" style="width:100%;height:100%;object-fit:cover">
+                            <source src="{{ asset('storage/'.$salonContent->path) }}" type="{{ $salonContent->mime_type }}">
+                        </video>
+                    @else
+                        <img src="{{ asset('storage/'.$salonContent->path) }}" alt="Content 1 salon content">
+                    @endif
+                @else
+                    <div class="ma-artwork-thumb--placeholder">Content 1 not uploaded</div>
+                @endif
+            </div>
+            <div class="ma-artwork-media-card__body">
+                <strong>Content 1 · Salon / profile media</strong>
+                <small>{{ $salonContent ? ucfirst($salonContent->kind) : 'Empty slot' }}</small>
+
+                <form class="ma-form" method="POST" enctype="multipart/form-data" action="{{ route('admin.makers.content.store', ['maker' => $maker, 'slot' => 1]) }}">
+                    @csrf
+                    <div class="ma-field">
+                        <label for="content_1_media">{{ $salonContent ? 'Replace media (optional)' : 'Upload media' }}</label>
+                        <input id="content_1_media" name="media" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" @required(! $salonContent)>
+                    </div>
+                    <div class="ma-field">
+                        <label for="content_1_caption">Caption</label>
+                        <textarea id="content_1_caption" name="caption" rows="3" maxlength="1000">{{ old('caption', $salonContent?->caption) }}</textarea>
+                    </div>
+                    <button class="ma-button ma-button--primary" type="submit">{{ $salonContent ? 'Save Content 1' : 'Create Content 1' }}</button>
+                </form>
+
+                @if ($salonContent)
+                    <form method="POST" action="{{ route('admin.makers.content.destroy', ['maker' => $maker, 'slot' => 1]) }}">
+                        @csrf @method('DELETE')
+                        <button class="ma-button ma-button--outline" type="submit">Remove Content 1</button>
+                    </form>
+                @endif
+            </div>
+        </article>
+
+        @for ($slot = 2; $slot <= 4; $slot++)
+            @php($placement = $maker->makerProfile?->artworkSlots?->firstWhere('slot', $slot))
+            @php($artwork = $placement?->artwork)
+
             <article class="ma-artwork-media-card">
                 <div class="ma-artwork-media-card__visual">
-                    @if ($content)
-                        @if ($content->kind === 'video')
-                            <video controls preload="metadata" style="width:100%;height:100%;object-fit:cover">
-                                <source src="{{ asset('storage/'.$content->path) }}" type="{{ $content->mime_type }}">
-                            </video>
-                        @else
-                            <img src="{{ asset('storage/'.$content->path) }}" alt="Content {{ $slot }}">
-                        @endif
+                    @if ($artwork?->primaryMedia)
+                        <img src="{{ $artwork->primaryMedia->url() }}" alt="{{ $artwork->title }}">
                     @else
-                        <div class="ma-artwork-thumb--placeholder">Content {{ $slot }} not uploaded</div>
+                        <div class="ma-artwork-thumb--placeholder">Content {{ $slot }} artwork not assigned</div>
                     @endif
                 </div>
+
                 <div class="ma-artwork-media-card__body">
-                    <strong>Content {{ $slot }}</strong>
-                    @if ($content)
-                        <small>{{ ucfirst($content->kind) }}{{ $content->mime_type ? ' · '.$content->mime_type : '' }}</small>
+                    <strong>Content {{ $slot }} · Artwork</strong>
+
+                    @if ($artwork)
+                        <small>
+                            #{{ $artwork->id }} · {{ $artwork->title }}
+                            · {{ ucfirst($artwork->moderation_status->value) }}
+                            · {{ $artwork->is_visible ? 'Visible' : 'Hidden' }}
+                        </small>
+                        <p class="ma-muted-copy">This slot references the canonical Artwork record. Its image, metadata, moderation and visibility are managed in Artwork Management.</p>
+                        <a class="ma-button ma-button--outline" href="{{ route('admin.artworks.show', $artwork) }}">Manage artwork</a>
                     @else
-                        <small>Empty slot</small>
-                    @endif
-
-                    <form class="ma-form" method="POST" enctype="multipart/form-data" action="{{ route('admin.makers.content.store', ['maker' => $maker, 'slot' => $slot]) }}">
-                        @csrf
-                        <div class="ma-field">
-                            <label for="content_{{ $slot }}_media">{{ $content ? 'Replace media (optional)' : 'Upload media' }}</label>
-                            <input id="content_{{ $slot }}_media" name="media" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" @required(! $content)>
-                        </div>
-                        <div class="ma-field">
-                            <label for="content_{{ $slot }}_caption">Caption</label>
-                            <textarea id="content_{{ $slot }}_caption" name="caption" rows="3" maxlength="1000">{{ old('caption', $content?->caption) }}</textarea>
-                        </div>
-                        <button class="ma-button ma-button--primary" type="submit">{{ $content ? 'Save Content '.$slot : 'Create Content '.$slot }}</button>
-                    </form>
-
-                    @if ($content)
-                        <form method="POST" action="{{ route('admin.makers.content.destroy', ['maker' => $maker, 'slot' => $slot]) }}">
-                            @csrf @method('DELETE')
-                            <button class="ma-button ma-button--outline" type="submit">Remove Content {{ $slot }}</button>
-                        </form>
+                        <small>Empty artwork slot</small>
+                        <p class="ma-muted-copy">Content {{ $slot }} is reserved for a real Artwork record. It cannot use separate profile-content media.</p>
+                        <a class="ma-button ma-button--outline" href="{{ route('admin.artworks.index', ['maker_id' => $maker->id]) }}">View Maker artwork</a>
                     @endif
                 </div>
             </article>

@@ -35,7 +35,18 @@
             <div><dt>Maker</dt><dd>{{ $artwork->maker?->name ?? 'Unknown' }}</dd></div>
             <div><dt>Location</dt><dd>{{ $artwork->location?->displayLabel() ?? $artwork->location_text ?? 'Not set' }}</dd></div>
             <div><dt>Images</dt><dd>{{ $artwork->media->count() }}</dd></div>
-            <div><dt>Maker Info</dt><dd>@if($artwork->makerInfoSlots->isEmpty())Not featured@else@foreach($artwork->makerInfoSlots as $placement)Content {{ $placement->slot }}{{ $loop->last ? '' : ', ' }}@endforeach@endif</dd></div>
+            <div>
+                <dt>Maker Info</dt>
+                <dd>
+                    @if ($artwork->makerInfoSlots->isEmpty())
+                        Not featured
+                    @else
+                        @foreach ($artwork->makerInfoSlots as $placement)
+                            Content {{ $placement->slot }}{{ $loop->last ? '' : ', ' }}
+                        @endforeach
+                    @endif
+                </dd>
+            </div>
             <div><dt>Created</dt><dd>{{ $artwork->created_at?->format('M j, Y g:i A') }}</dd></div>
         </dl>
         @if($artwork->rejection_reason)<div class="ma-callout ma-callout--danger"><strong>Rejection reason</strong><p>{{ $artwork->rejection_reason }}</p></div>@endif

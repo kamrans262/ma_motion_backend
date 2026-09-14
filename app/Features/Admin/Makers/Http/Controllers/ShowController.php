@@ -20,6 +20,7 @@ final class ShowController extends Controller
         $maker->loadMissing([
             'makerProfile.location',
             'makerProfile.contents',
+            'makerProfile.artworkSlots.artwork.primaryMedia',
         ]);
         $maker->loadCount(['savedByAppreciators as saves_count']);
 
