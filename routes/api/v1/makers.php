@@ -19,10 +19,10 @@ Route::middleware(['auth:sanctum', 'account.active', 'role:maker'])->group(funct
     Route::get('/me/maker-profile', ShowMyProfileController::class)->name('me.maker-profile.show');
     Route::patch('/me/maker-profile', UpdateMyProfileController::class)->name('me.maker-profile.update');
     Route::post('/me/maker-profile/carousel/{slot}', SaveProfileContentController::class)
-        ->whereIn('slot', ['1', '2', '3'])
+        ->whereIn('slot', ['1'])
         ->name('me.maker-profile.carousel.store');
     Route::delete('/me/maker-profile/carousel/{slot}', DeleteProfileContentController::class)
-        ->whereIn('slot', ['1', '2', '3'])
+        ->whereIn('slot', ['1'])
         ->name('me.maker-profile.carousel.destroy');
 
     Route::put('/me/maker-profile/artwork-slots/{slot}', AssignArtworkSlotController::class)

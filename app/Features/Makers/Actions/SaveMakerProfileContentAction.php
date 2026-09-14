@@ -15,9 +15,9 @@ final class SaveMakerProfileContentAction
 {
     public function execute(User $maker, int $slot, ?UploadedFile $media, ?string $caption): MakerProfileContent
     {
-        if ($slot < 1 || $slot > 3) {
+        if ($slot !== 1) {
             throw ValidationException::withMessages([
-                'slot' => ['Content slot must be between 1 and 3.'],
+                'slot' => ['Only Content 1 is Maker profile media. Content 2 through 4 are artworks.'],
             ]);
         }
 

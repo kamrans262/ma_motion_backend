@@ -22,7 +22,7 @@ final class ArtworkManagementService
     public function paginate(array $filters): LengthAwarePaginator
     {
         $query = Artwork::query()
-            ->with(['maker:id,name,email', 'type:id,name', 'style:id,name', 'location', 'primaryMedia'])
+            ->with(['maker:id,name,email', 'type:id,name', 'style:id,name', 'location', 'primaryMedia', 'makerInfoSlots'])
             ->withCount('media')
             ->latest('id');
 
@@ -60,7 +60,7 @@ final class ArtworkManagementService
     public function find(int $artworkId): Artwork
     {
         return Artwork::query()
-            ->with(['maker.makerProfile', 'type', 'style', 'location', 'media'])
+            ->with(['maker.makerProfile', 'type', 'style', 'location', 'media', 'makerInfoSlots'])
             ->findOrFail($artworkId);
     }
 

@@ -4,6 +4,7 @@ namespace App\Features\Artworks\Models;
 
 use App\Features\Artworks\Enums\ArtworkModerationStatus;
 use App\Features\Locations\Models\Location;
+use App\Features\Makers\Models\MakerProfileArtworkSlot;
 use App\Features\Shows\Models\Show;
 use App\Features\Taxonomy\Models\ArtworkStyle;
 use App\Features\Taxonomy\Models\ArtworkType;
@@ -76,6 +77,12 @@ final class Artwork extends Model
     public function primaryMedia(): HasOne
     {
         return $this->hasOne(ArtworkMedia::class)->where('is_primary', true);
+    }
+
+    /** @return HasMany<MakerProfileArtworkSlot, $this> */
+    public function makerInfoSlots(): HasMany
+    {
+        return $this->hasMany(MakerProfileArtworkSlot::class)->orderBy('slot');
     }
 
     /** @return BelongsToMany<Show, $this> */
