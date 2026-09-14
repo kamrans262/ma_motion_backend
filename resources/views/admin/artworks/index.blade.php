@@ -37,7 +37,7 @@
                 <tbody>
                 @foreach($artworks as $artwork)
                     <tr>
-                        <td data-label="Artwork"><div class="ma-artwork-cell">@if($artwork->primaryMedia)<img class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" alt="">@else<span class="ma-artwork-thumb ma-artwork-thumb--placeholder" aria-hidden="true">◇</span>@endif<div><strong>{{ $artwork->title }}</strong><small>#{{ $artwork->id }} · {{ $artwork->created_at?->format('M j, Y') }}</small></div></div></td>
+                        <td data-label="Artwork"><div class="ma-artwork-cell">@if($artwork->primaryMedia)<img class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" alt="">@else<span class="ma-artwork-thumb ma-artwork-thumb--placeholder" aria-hidden="true">◇</span>@endif<div><strong>{{ $artwork->title }}</strong><small>#{{ $artwork->id }} · {{ $artwork->created_at?->format('M j, Y') }}</small>@if($artwork->makerInfoSlots->isNotEmpty())<small>Maker Info · @foreach($artwork->makerInfoSlots as $placement)Content {{ $placement->slot }}{{ $loop->last ? '' : ', ' }}@endforeach</small>@endif</div></div></td>
                         <td data-label="Maker"><strong>{{ $artwork->maker?->name ?? 'Unknown' }}</strong><small>{{ $artwork->maker?->email }}</small></td>
                         <td data-label="Type / Style">{{ $artwork->type?->name ?? '—' }}<small>{{ $artwork->style?->name ?? 'No style' }}</small></td>
                         <td data-label="Moderation"><span class="ma-badge {{ $artwork->moderation_status->value === 'approved' ? 'ma-badge--success' : ($artwork->moderation_status->value === 'rejected' ? 'ma-badge--danger' : 'ma-badge--purple') }}">{{ ucfirst($artwork->moderation_status->value) }}</span></td>

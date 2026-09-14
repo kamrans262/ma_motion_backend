@@ -113,6 +113,23 @@ final class MakerInfoArtworkSlotApiTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_legacy_profile_media_routes_do_not_accept_artwork_slots(): void
+    {
+        $maker = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $token = $maker->createToken('mobile', ['mobile'])->plainTextToken;
+
+        $this->withToken($token)
+            ->postJson('/api/v1/me/maker-profile/carousel/2', [])
+            ->assertNotFound();
+
+        $this->withToken($token)
+            ->deleteJson('/api/v1/me/maker-profile/carousel/3')
+            ->assertNotFound();
+    }
+
     public function test_private_profile_returns_artwork_slot_contract(): void
     {
         $maker = User::factory()->create([

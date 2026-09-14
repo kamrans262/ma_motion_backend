@@ -41,20 +41,20 @@ final class MakerInfoSettingsApiTest extends TestCase
             ->assertJsonPath('data.show_shows_on_info_page', false);
 
         $this->withToken($token)
-            ->post('/api/v1/me/maker-profile/carousel/2', [
-                'caption' => 'Content two',
-                'media' => UploadedFile::fake()->image('content-two.jpg', 1200, 900),
+            ->post('/api/v1/me/maker-profile/carousel/1', [
+                'caption' => 'Salon content',
+                'media' => UploadedFile::fake()->image('salon.jpg', 1200, 900),
             ], ['Accept' => 'application/json'])
             ->assertOk()
-            ->assertJsonPath('data.slot', 2)
+            ->assertJsonPath('data.slot', 1)
             ->assertJsonPath('data.kind', 'image')
-            ->assertJsonPath('data.caption', 'Content two');
+            ->assertJsonPath('data.caption', 'Salon content');
 
         $this->withToken($token)
             ->getJson('/api/v1/me/maker-profile')
             ->assertOk()
-            ->assertJsonPath('data.carousel_content.0.slot', 2)
-            ->assertJsonPath('data.carousel_content.0.caption', 'Content two');
+            ->assertJsonPath('data.carousel_content.0.slot', 1)
+            ->assertJsonPath('data.carousel_content.0.caption', 'Salon content');
 
         $this->assertDatabaseHas('maker_profiles', [
             'user_id' => $maker->id,
@@ -126,7 +126,7 @@ final class MakerInfoSettingsApiTest extends TestCase
         $token = $maker->createToken('mobile', ['mobile'])->plainTextToken;
 
         $this->withToken($token)
-            ->postJson('/api/v1/me/maker-profile/carousel/3', [
+            ->postJson('/api/v1/me/maker-profile/carousel/1', [
                 'caption' => 'Missing media',
             ])
             ->assertUnprocessable()

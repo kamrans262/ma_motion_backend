@@ -18,8 +18,10 @@ class AdminArtworkUiContractTest extends TestCase
         $admin=User::factory()->create(['role'=>UserRole::Admin,'status'=>UserStatus::Active]);
         $maker=User::factory()->create(['role'=>UserRole::Maker,'status'=>UserStatus::Active]);
         $artwork=Artwork::query()->create(['maker_id'=>$maker->id,'title'=>'UI Contract','moderation_status'=>'pending','is_visible'=>true,'sort_order'=>0]);
-        $this->actingAs($admin)->get('/admin/artworks')->assertOk()->assertSee('Artwork directory')->assertSee('admin/artworks',false);
-        $this->actingAs($admin)->get('/admin/artworks/'.$artwork->id)->assertOk()->assertSee('Publishing control')->assertSee('Artwork images');
+        $profile=$maker->makerProfile()->create();
+        $profile->artworkSlots()->create(['slot'=>2,'artwork_id'=>$artwork->id]);
+        $this->actingAs($admin)->get('/admin/artworks')->assertOk()->assertSee('Artwork directory')->assertSee('admin/artworks',false)->assertSee('Maker Info')->assertSee('Content 2');
+        $this->actingAs($admin)->get('/admin/artworks/'.$artwork->id)->assertOk()->assertSee('Publishing control')->assertSee('Artwork images')->assertSee('Maker Info')->assertSee('Content 2');
         $sidebar=file_get_contents(resource_path('views/admin/partials/sidebar.blade.php'));
         $css=file_get_contents(public_path('assets/admin/css/admin.css'));
         $this->assertStringContainsString("admin.artworks.index",$sidebar);
