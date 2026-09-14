@@ -64,13 +64,9 @@ final class MakerInfoArtworkSlotApiTest extends TestCase
         $this->assertDatabaseHas('artworks', ['id' => $second->id]);
     }
 
-    public function test_artwork_cannot_be_used_in_two_slots_or_assigned_by_another_maker(): void
+    public function test_artwork_cannot_be_used_in_two_slots(): void
     {
         $maker = User::factory()->create([
-            'role' => UserRole::Maker,
-            'status' => UserStatus::Active,
-        ]);
-        $other = User::factory()->create([
             'role' => UserRole::Maker,
             'status' => UserStatus::Active,
         ]);
@@ -82,7 +78,6 @@ final class MakerInfoArtworkSlotApiTest extends TestCase
             'sort_order' => 0,
         ]);
         $token = $maker->createToken('mobile', ['mobile'])->plainTextToken;
-        $otherToken = $other->createToken('mobile', ['mobile'])->plainTextToken;
 
         $this->withToken($token)
             ->putJson('/api/v1/me/maker-profile/artwork-slots/2', ['artwork_id' => $artwork->id])
@@ -92,8 +87,28 @@ final class MakerInfoArtworkSlotApiTest extends TestCase
             ->putJson('/api/v1/me/maker-profile/artwork-slots/3', ['artwork_id' => $artwork->id])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('artwork_id');
+    }
 
-        $this->withToken($otherToken)
+    public function test_maker_cannot_assign_another_makers_artwork(): void
+    {
+        $owner = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $other = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $artwork = Artwork::query()->create([
+            'maker_id' => $owner->id,
+            'title' => 'Owner artwork',
+            'moderation_status' => 'pending',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+        $token = $other->createToken('mobile', ['mobile'])->plainTextToken;
+
+        $this->withToken($token)
             ->putJson('/api/v1/me/maker-profile/artwork-slots/2', ['artwork_id' => $artwork->id])
             ->assertNotFound();
     }
