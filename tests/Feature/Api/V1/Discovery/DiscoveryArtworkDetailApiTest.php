@@ -25,7 +25,7 @@ final class DiscoveryArtworkDetailApiTest extends TestCase
             'name' => 'Mara Vellan',
         ]);
 
-        $maker->makerProfile()->updateOrCreate(
+        $profile = $maker->makerProfile()->updateOrCreate(
             ['user_id' => $maker->id],
             [
                 'bio' => 'A contemporary artist exploring material and color.',
@@ -72,6 +72,46 @@ final class DiscoveryArtworkDetailApiTest extends TestCase
             'is_primary' => true,
         ]);
 
+        $slotTwo = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Maker Info Content 2',
+            'description' => 'Second configured art display item.',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+            'sort_order' => 1,
+        ]);
+        $slotTwoMedia = ArtworkMedia::query()->create([
+            'artwork_id' => $slotTwo->id,
+            'kind' => 'image',
+            'disk' => 'public',
+            'path' => 'artworks/content-two.jpg',
+            'mime_type' => 'image/jpeg',
+            'size_bytes' => 300,
+            'width' => 900,
+            'height' => 1100,
+            'alt_text' => 'Maker Info Content 2',
+            'sort_order' => 1,
+            'is_primary' => true,
+        ]);
+        $slotThreePending = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Pending Maker Info Content 3',
+            'moderation_status' => 'pending',
+            'is_visible' => true,
+            'sort_order' => 2,
+        ]);
+        $slotFourHidden = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Hidden Maker Info Content 4',
+            'moderation_status' => 'approved',
+            'is_visible' => false,
+            'sort_order' => 3,
+        ]);
+
+        $profile->artworkSlots()->create(['slot' => 2, 'artwork_id' => $slotTwo->id]);
+        $profile->artworkSlots()->create(['slot' => 3, 'artwork_id' => $slotThreePending->id]);
+        $profile->artworkSlots()->create(['slot' => 4, 'artwork_id' => $slotFourHidden->id]);
+
         $this->getJson('/api/v1/discovery/artworks/'.$artwork->id)
             ->assertOk()
             ->assertJsonPath('data.id', $artwork->id)
@@ -80,6 +120,11 @@ final class DiscoveryArtworkDetailApiTest extends TestCase
             ->assertJsonPath('data.media.0.id', $first->id)
             ->assertJsonPath('data.media.1.id', $second->id)
             ->assertJsonPath('data.primary_media.id', $first->id)
+            ->assertJsonCount(1, 'data.art_display_artworks')
+            ->assertJsonPath('data.art_display_artworks.0.slot', 2)
+            ->assertJsonPath('data.art_display_artworks.0.artwork.id', $slotTwo->id)
+            ->assertJsonPath('data.art_display_artworks.0.artwork.title', 'Maker Info Content 2')
+            ->assertJsonPath('data.art_display_artworks.0.artwork.primary_media.id', $slotTwoMedia->id)
             ->assertJsonPath('data.maker.id', $maker->id)
             ->assertJsonPath('data.maker.name', 'Mara Vellan')
             ->assertJsonPath('data.maker.website_url', 'https://artist.example')

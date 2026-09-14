@@ -2,6 +2,7 @@
 
 namespace App\Features\Discovery\Http\Resources;
 
+use App\Features\Artworks\Enums\ArtworkModerationStatus;
 use App\Features\Artworks\Http\Resources\ArtworkMediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,6 +16,36 @@ final class DiscoveryArtworkDetailResource extends JsonResource
         $makerProfile = $this->maker?->makerProfile;
         $effectiveLocation = $this->location ?: $makerProfile?->location;
         $primaryMedia = $this->primaryMedia;
+        $artDisplayArtworks = collect($makerProfile?->artworkSlots ?? [])
+            ->filter(function ($placement): bool {
+                $artwork = $placement->artwork;
+
+                return $placement->slot >= 2
+                    && $placement->slot <= 4
+                    && $artwork !== null
+                    && (int) $artwork->maker_id === (int) $this->maker_id
+                    && $artwork->moderation_status === ArtworkModerationStatus::Approved
+                    && $artwork->is_visible;
+            })
+            ->map(function ($placement) use ($request): array {
+                $artwork = $placement->artwork;
+                $primaryMedia = $artwork->primaryMedia;
+
+                return [
+                    'slot' => (int) $placement->slot,
+                    'artwork' => [
+                        'id' => $artwork->id,
+                        'title' => $artwork->title,
+                        'description' => $artwork->description,
+                        'primary_media' => $primaryMedia
+                            ? ArtworkMediaResource::make($primaryMedia)->resolve($request)
+                            : null,
+                        'created_at' => $artwork->created_at?->toISOString(),
+                    ],
+                ];
+            })
+            ->values()
+            ->all();
 
         return [
             'id' => $this->id,
@@ -45,6 +76,7 @@ final class DiscoveryArtworkDetailResource extends JsonResource
                 'longitude' => $effectiveLocation->longitude,
             ] : null,
             'location_text' => $this->location_text ?: $makerProfile?->location_text,
+            'art_display_artworks' => $artDisplayArtworks,
             'maker' => $this->maker ? [
                 'id' => $this->maker->id,
                 'name' => $this->maker->name,

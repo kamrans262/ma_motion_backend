@@ -24,7 +24,10 @@ final class ArtworkDetailService
                 'maker' => static function ($makerQuery): void {
                     $makerQuery
                         ->select(['id', 'name', 'role', 'status', 'created_at'])
-                        ->with(['makerProfile.location'])
+                        ->with([
+                            'makerProfile.location',
+                            'makerProfile.artworkSlots.artwork.primaryMedia',
+                        ])
                         ->withCount(['savedByAppreciators as saves_count']);
                 },
                 'type:id,name,slug,is_active',
