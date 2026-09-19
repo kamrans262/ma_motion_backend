@@ -36,7 +36,46 @@ class ExperienceSwitchApiTest extends TestCase
             ->assertJsonPath('data.maker_registered', true)
             ->assertJsonPath('data.maker_onboarding_completed', true)
             ->assertJsonPath('data.appreciator_registered', true)
-            ->assertJsonPath('data.appreciator_onboarding_completed', true);
+            ->assertJsonPath('data.appreciator_onboarding_completed', true)
+            ->assertJsonPath('data.maker_profile.location_text', null)
+            ->assertJsonPath('data.appreciator_profile.location_text', 'Chicago');
+    }
+
+    public function test_me_supplies_both_profile_locations_independent_of_active_role(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Dual Profile',
+            'email' => 'dual@example.com',
+            'role' => UserRole::Appreciator,
+            'status' => UserStatus::Active,
+        ]);
+        $user->makerProfile()->create([
+            'bio' => 'Keep the original statement',
+            'location_text' => 'Brooklyn 11201',
+            'onboarding_completed_at' => now(),
+        ]);
+        $user->appreciatorProfile()->create([
+            'location_text' => 'Chicago 60601',
+            'onboarding_completed_at' => now(),
+        ]);
+
+        $token = $user->createToken('mobile', ['mobile'])->plainTextToken;
+        $this->withToken($token)->getJson('/api/v1/me')
+            ->assertOk()
+            ->assertJsonPath('data.name', 'Dual Profile')
+            ->assertJsonPath('data.email', 'dual@example.com')
+            ->assertJsonPath('data.maker_profile.location_text', 'Brooklyn 11201')
+            ->assertJsonPath('data.maker_profile.bio', 'Keep the original statement')
+            ->assertJsonPath('data.appreciator_profile.location_text', 'Chicago 60601');
+
+        $this->withToken($token)
+            ->patchJson('/api/v1/me/experience', ['experience' => 'maker'])
+            ->assertOk()
+            ->assertJsonPath('data.maker_profile.location_text', 'Brooklyn 11201')
+            ->assertJsonPath('data.appreciator_profile.location_text', 'Chicago 60601');
+
+        $this->assertDatabaseCount('users', 1);
+        $this->assertDatabaseCount('personal_access_tokens', 1);
     }
 
     public function test_completed_profiles_switch_on_same_user_and_keep_token_and_data(): void
@@ -137,17 +176,24 @@ class ExperienceSwitchApiTest extends TestCase
 
         $this->withToken($token)
             ->postJson('/api/v1/me/experience/appreciator/onboarding', [
-                'name' => 'Existing Maker',
-                'email' => 'maker@example.com',
+                'name' => 'Edited Name',
+                'email' => 'edited@example.com',
                 'location_text' => 'Chicago',
             ])
             ->assertOk()
+            ->assertJsonPath('data.name', 'Edited Name')
+            ->assertJsonPath('data.email', 'edited@example.com')
             ->assertJsonPath('data.role', 'appreciator')
             ->assertJsonPath('data.appreciator_onboarding_completed', true)
             ->assertJsonPath('data.maker_onboarding_completed', true);
 
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('personal_access_tokens', 1);
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Edited Name',
+            'email' => 'edited@example.com',
+        ]);
         $this->assertDatabaseHas('maker_profiles', [
             'user_id' => $user->id,
             'bio' => 'Keep this maker profile',
