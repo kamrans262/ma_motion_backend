@@ -11,7 +11,14 @@ final class StartMakerExperienceOnboardingAction
     public function execute(User $user): User
     {
         return DB::transaction(function () use ($user): User {
-            $user->makerProfile()->firstOrCreate(['user_id' => $user->id]);
+            $makerProfile = $user->makerProfile()->firstOrCreate(['user_id' => $user->id]);
+            $appreciator = $user->appreciatorProfile()->first();
+            if (blank($makerProfile->location_text) && filled($appreciator?->location_text)) {
+                $makerProfile->update([
+                    'location_text' => $appreciator->location_text,
+                    'location_id' => $makerProfile->location_id ?? $appreciator->location_id,
+                ]);
+            }
 
             if ($user->role !== UserRole::Maker) {
                 $user->update(['role' => UserRole::Maker]);
