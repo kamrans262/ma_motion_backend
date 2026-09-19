@@ -2,7 +2,6 @@
 
 namespace App\Features\Auth\Http\Resources;
 
-use App\Features\Auth\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +15,10 @@ class UserResource extends JsonResource
 
         $makerProfile = $this->makerProfile;
         $appreciatorProfile = $this->appreciatorProfile;
-        $activeMakerProfile = $this->role === UserRole::Maker ? $makerProfile : null;
+        // /me is the authenticated account's source of truth for both experiences.
+        // Expose only this user's shared profile fields, even while the other
+        // experience is active, so onboarding can prefill without role changes.
+
 
         return [
             'id' => $this->id,
@@ -32,12 +34,17 @@ class UserResource extends JsonResource
             'email_verified_at' => $this->email_verified_at?->toISOString(),
             'last_login_at' => $this->last_login_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
-            'maker_profile' => $activeMakerProfile === null ? null : [
-                'bio' => $activeMakerProfile->bio,
-                'location' => $activeMakerProfile->location_text,
-                'profile_image_url' => $activeMakerProfile->profile_image_path
-                    ? Storage::disk('public')->url($activeMakerProfile->profile_image_path)
+            'maker_profile' => $makerProfile === null ? null : [
+                'bio' => $makerProfile->bio,
+                'location' => $makerProfile->location_text,
+                'location_text' => $makerProfile->location_text,
+                'profile_image_url' => $makerProfile->profile_image_path
+                    ? Storage::disk('public')->url($makerProfile->profile_image_path)
                     : null,
+            ],
+            'appreciator_profile' => $appreciatorProfile === null ? null : [
+                'location_text' => $appreciatorProfile->location_text,
+                'location_id' => $appreciatorProfile->location_id,
             ],
         ];
     }
