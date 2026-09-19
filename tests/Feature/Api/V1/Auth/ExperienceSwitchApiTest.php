@@ -230,11 +230,19 @@ class ExperienceSwitchApiTest extends TestCase
 
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseCount('personal_access_tokens', 1);
-        $this->assertDatabaseHas('maker_profiles', ['user_id' => $user->id]);
+        $this->assertDatabaseHas('maker_profiles', [
+            'user_id' => $user->id,
+            'location_text' => 'Chicago',
+        ]);
         $this->assertDatabaseHas('appreciator_profiles', [
             'user_id' => $user->id,
             'location_text' => 'Chicago',
         ]);
+
+        $this->withToken($token)
+            ->postJson('/api/v1/me/experience/maker/onboarding')
+            ->assertOk();
+        $this->assertDatabaseCount('maker_profiles', 1);
 
         $this->withToken($token)
             ->getJson('/api/v1/me/maker-profile')
