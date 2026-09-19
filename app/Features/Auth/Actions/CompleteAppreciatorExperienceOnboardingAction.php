@@ -21,12 +21,19 @@ final class CompleteAppreciatorExperienceOnboardingAction
                 'email' => mb_strtolower(trim($data['email'])),
             ]);
 
+            $existing = $user->appreciatorProfile()->first();
+            $locationText = trim($data['location_text']);
+
             $user->appreciatorProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'location_text' => trim($data['location_text']),
-                    'location_id' => $data['location_id'] ?? null,
-                    'onboarding_completed_at' => now(),
+                    'location_text' => $locationText,
+                    'location_id' => $data['location_id'] ?? (
+                        $existing?->location_text === $locationText
+                            ? $existing->location_id
+                            : null
+                    ),
+                    'onboarding_completed_at' => $existing?->onboarding_completed_at ?? now(),
                 ],
             );
 
