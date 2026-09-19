@@ -14,6 +14,13 @@ final class CompleteAppreciatorExperienceOnboardingAction
     public function execute(User $user, array $data): User
     {
         return DB::transaction(function () use ($user, $data): User {
+            // Appreciator onboarding belongs to the same authenticated user.
+            // Persist edited shared fields, without issuing another account/token.
+            $user->update([
+                'name' => trim($data['name']),
+                'email' => mb_strtolower(trim($data['email'])),
+            ]);
+
             $user->appreciatorProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
