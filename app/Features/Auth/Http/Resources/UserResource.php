@@ -15,11 +15,10 @@ class UserResource extends JsonResource
 
         $makerProfile = $this->makerProfile;
         $appreciatorProfile = $this->appreciatorProfile;
+
         // /me is the authenticated account's source of truth for both experiences.
         // Expose only this user's shared profile fields, even while the other
         // experience is active, so onboarding can prefill without role changes.
-
-
         return [
             'id' => $this->id,
             'name' => $this->name,
