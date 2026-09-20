@@ -79,7 +79,7 @@ final class DeleteAccountApiTest extends TestCase
             'path' => 'maker-profiles/'.$maker->id.'/content/salon.mp4',
         ]);
         Storage::disk('public')->assertMissing('maker-profiles/'.$maker->id.'/content/salon.mp4');
-        $this->withToken($token)->getJson('/api/v1/me')->assertUnauthorized();
+        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 
     public function test_passwordless_appreciator_can_confirm_deletion_without_a_password(): void
