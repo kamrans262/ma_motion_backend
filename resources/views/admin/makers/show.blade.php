@@ -164,7 +164,7 @@
             <article class="ma-artwork-media-card">
                 <div class="ma-artwork-media-card__visual">
                     @if ($artwork?->primaryMedia)
-                        <img src="{{ $artwork->primaryMedia->url() }}" alt="{{ $artwork->title }}">
+                        @if($artwork->primaryMedia->kind === 'video')<video src="{{ $artwork->primaryMedia->url() }}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain"></video>@else<img src="{{ $artwork->primaryMedia->url() }}" alt="{{ $artwork->title }}">@endif
                     @else
                         <div class="ma-artwork-thumb--placeholder">Content {{ $slot }} artwork not assigned</div>
                     @endif
@@ -179,7 +179,7 @@
                             · {{ ucfirst($artwork->moderation_status->value) }}
                             · {{ $artwork->is_visible ? 'Visible' : 'Hidden' }}
                         </small>
-                        <p class="ma-muted-copy">This slot references the canonical Artwork record. Its image, metadata, moderation and visibility are managed in Artwork Management.</p>
+                        <p class="ma-muted-copy">This slot references the canonical Artwork record. Its image or video, metadata, moderation and visibility are managed in Artwork Management.</p>
                         <a class="ma-button ma-button--outline" href="{{ route('admin.artworks.show', $artwork) }}">Manage artwork</a>
                     @else
                         <small>Empty artwork slot</small>
