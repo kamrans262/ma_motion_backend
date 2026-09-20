@@ -12,6 +12,10 @@ final class AccountDeletionService
     public function delete(User $user): void
     {
         $profileImagePath = $user->makerProfile?->profile_image_path;
+        $contentPaths = $user->makerProfile?->contents()
+            ->pluck('path')
+            ->filter()
+            ->all() ?? [];
 
         $mediaFiles = Artwork::query()
             ->withTrashed()
@@ -33,6 +37,10 @@ final class AccountDeletionService
 
         if ($profileImagePath) {
             Storage::disk('public')->delete($profileImagePath);
+        }
+
+        foreach ($contentPaths as $path) {
+            Storage::disk('public')->delete($path);
         }
     }
 }
