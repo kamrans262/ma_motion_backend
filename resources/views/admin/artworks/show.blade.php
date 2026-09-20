@@ -64,7 +64,16 @@
     <div class="ma-artwork-media-grid">
         @foreach($artwork->media as $media)
             <article class="ma-artwork-media-card">
-                <div class="ma-artwork-media-card__visual">@if($media->kind === 'video')<video src="{{ $media->url() }}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain"></video>@else<img src="{{ $media->url() }}" alt="{{ $media->alt_text ?? $artwork->title }}">@endif@if($media->is_primary)<span class="ma-artwork-primary-label">Primary</span>@endif</div>
+                <div class="ma-artwork-media-card__visual">
+                    @if ($media->kind === 'video')
+                        <video src="{{ $media->url() }}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain"></video>
+                    @else
+                        <img src="{{ $media->url() }}" alt="{{ $media->alt_text ?? $artwork->title }}">
+                    @endif
+                    @if ($media->is_primary)
+                        <span class="ma-artwork-primary-label">Primary</span>
+                    @endif
+                </div>
                 <div class="ma-artwork-media-card__body"><strong>{{ $media->width }} × {{ $media->height }}</strong><small>{{ strtoupper(pathinfo($media->path, PATHINFO_EXTENSION)) }} · {{ number_format($media->size_bytes / 1024) }} KB</small><div class="ma-table-actions">@unless($media->is_primary)<form method="POST" action="{{ route('admin.artworks.media.primary',[$artwork,$media]) }}">@csrf @method('PATCH')<button class="ma-button ma-button--outline ma-button--compact" type="submit">Make primary</button></form>@endunless<form method="POST" action="{{ route('admin.artworks.media.destroy',[$artwork,$media]) }}" onsubmit="return confirm('Remove this media from the artwork?')">@csrf @method('DELETE')<button class="ma-button ma-button--danger ma-button--compact" type="submit" @disabled($artwork->media->count() <= 1)>Remove</button></form></div></div>
             </article>
         @endforeach
