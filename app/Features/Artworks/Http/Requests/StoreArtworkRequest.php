@@ -25,11 +25,9 @@ final class StoreArtworkRequest extends FormRequest
             'media.*' => [
                 'required',
                 'file',
-                'image',
-                'mimes:jpg,jpeg,png,webp',
-                'mimetypes:image/jpeg,image/png,image/webp',
-                'max:10240',
-                'dimensions:max_width=12000,max_height=12000',
+                'mimes:jpg,jpeg,png,webp,mp4,mov,m4v,webm',
+                'mimetypes:image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/x-m4v,video/webm',
+                'max:25600',
             ],
         ];
     }
