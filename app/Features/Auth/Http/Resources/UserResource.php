@@ -23,6 +23,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'has_password' => $this->password !== null,
             'role' => $this->role?->value,
             'active_experience' => $this->role?->value,
             'maker_registered' => $makerProfile !== null,
