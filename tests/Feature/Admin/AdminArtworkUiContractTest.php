@@ -21,7 +21,7 @@ class AdminArtworkUiContractTest extends TestCase
         $profile=$maker->makerProfile()->create();
         $profile->artworkSlots()->create(['slot'=>2,'artwork_id'=>$artwork->id]);
         $this->actingAs($admin)->get('/admin/artworks')->assertOk()->assertSee('Artwork directory')->assertSee('admin/artworks',false)->assertSee('Maker Info')->assertSee('Content 2');
-        $this->actingAs($admin)->get('/admin/artworks/'.$artwork->id)->assertOk()->assertSee('Publishing control')->assertSee('Artwork images')->assertSee('Maker Info')->assertSee('Content 2');
+        $this->actingAs($admin)->get('/admin/artworks/'.$artwork->id)->assertOk()->assertSee('Publishing control')->assertSee('Artwork media')->assertSee('Maker Info')->assertSee('Content 2');
         $sidebar=file_get_contents(resource_path('views/admin/partials/sidebar.blade.php'));
         $css=file_get_contents(public_path('assets/admin/css/admin.css'));
         $this->assertStringContainsString("admin.artworks.index",$sidebar);
