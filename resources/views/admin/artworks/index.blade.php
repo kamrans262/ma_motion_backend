@@ -40,7 +40,7 @@
                         <td data-label="Artwork">
                             <div class="ma-artwork-cell">
                                 @if($artwork->primaryMedia)
-                                    <img class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" alt="">
+                                    @if($artwork->primaryMedia->kind === 'video')<video class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" preload="metadata" muted playsinline></video>@else<img class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" alt="">@endif
                                 @else
                                     <span class="ma-artwork-thumb ma-artwork-thumb--placeholder" aria-hidden="true">◇</span>
                                 @endif
@@ -62,7 +62,7 @@
                         <td data-label="Type / Style">{{ $artwork->type?->name ?? '—' }}<small>{{ $artwork->style?->name ?? 'No style' }}</small></td>
                         <td data-label="Moderation"><span class="ma-badge {{ $artwork->moderation_status->value === 'approved' ? 'ma-badge--success' : ($artwork->moderation_status->value === 'rejected' ? 'ma-badge--danger' : 'ma-badge--purple') }}">{{ ucfirst($artwork->moderation_status->value) }}</span></td>
                         <td data-label="Visibility"><span class="ma-badge {{ $artwork->is_visible ? 'ma-badge--success' : 'ma-badge--muted' }}">{{ $artwork->is_visible ? 'Visible' : 'Hidden' }}</span></td>
-                        <td data-label="Media">{{ $artwork->media_count }} image{{ $artwork->media_count === 1 ? '' : 's' }}</td>
+                        <td data-label="Media">{{ $artwork->media_count }} media file{{ $artwork->media_count === 1 ? '' : 's' }}</td>
                         <td data-label="Action"><a class="ma-text-link" href="{{ route('admin.artworks.show', $artwork) }}">Manage</a></td>
                     </tr>
                 @endforeach
