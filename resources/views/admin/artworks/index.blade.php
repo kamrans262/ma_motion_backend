@@ -40,7 +40,11 @@
                         <td data-label="Artwork">
                             <div class="ma-artwork-cell">
                                 @if($artwork->primaryMedia)
-                                    @if($artwork->primaryMedia->kind === 'video')<video class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" preload="metadata" muted playsinline></video>@else<img class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" alt="">@endif
+                                    @if ($artwork->primaryMedia->kind === 'video')
+                                        <video class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" preload="metadata" muted playsinline></video>
+                                    @else
+                                        <img class="ma-artwork-thumb" src="{{ $artwork->primaryMedia->url() }}" alt="">
+                                    @endif
                                 @else
                                     <span class="ma-artwork-thumb ma-artwork-thumb--placeholder" aria-hidden="true">◇</span>
                                 @endif
