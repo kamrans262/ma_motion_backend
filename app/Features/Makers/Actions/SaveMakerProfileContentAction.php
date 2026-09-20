@@ -3,6 +3,7 @@
 namespace App\Features\Makers\Actions;
 
 use App\Features\Makers\Models\MakerProfileContent;
+use App\Support\Media\FiveSecondVideoGuard;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,8 @@ use Throwable;
 
 final class SaveMakerProfileContentAction
 {
+    public function __construct(private readonly FiveSecondVideoGuard $videoGuard) {}
+
     public function execute(User $maker, int $slot, ?UploadedFile $media, ?string $caption): MakerProfileContent
     {
         if ($slot !== 1) {
@@ -35,6 +38,8 @@ final class SaveMakerProfileContentAction
         $newKind = null;
 
         if ($media) {
+            $this->videoGuard->validate($media, 'media');
+
             $newPath = $media->store('maker-profiles/'.$maker->id.'/content', 'public');
 
             if (! is_string($newPath) || $newPath === '') {
