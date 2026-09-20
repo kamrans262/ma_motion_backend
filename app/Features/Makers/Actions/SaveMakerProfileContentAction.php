@@ -3,8 +3,8 @@
 namespace App\Features\Makers\Actions;
 
 use App\Features\Makers\Models\MakerProfileContent;
-use App\Support\Media\FiveSecondVideoGuard;
 use App\Models\User;
+use App\Support\Media\FiveSecondVideoGuard;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
