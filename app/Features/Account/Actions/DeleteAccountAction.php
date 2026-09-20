@@ -12,14 +12,14 @@ final class DeleteAccountAction
 {
     public function __construct(private readonly AccountDeletionService $deletion) {}
 
-    /** @param array{current_password:string,confirmation:string} $data */
+    /** @param array{current_password?:string|null,confirmation:string} $data */
     public function execute(User $user, array $data): void
     {
         if ($user->hasRole(UserRole::Admin)) {
             throw ValidationException::withMessages(['account' => 'Administrator accounts cannot be deleted from the mobile account endpoint.']);
         }
 
-        if (! Hash::check($data['current_password'], $user->password)) {
+        if ($user->password !== null && ! Hash::check((string) ($data['current_password'] ?? ''), $user->password)) {
             throw ValidationException::withMessages(['current_password' => 'The current password is incorrect.']);
         }
 
