@@ -164,7 +164,11 @@
             <article class="ma-artwork-media-card">
                 <div class="ma-artwork-media-card__visual">
                     @if ($artwork?->primaryMedia)
-                        @if($artwork->primaryMedia->kind === 'video')<video src="{{ $artwork->primaryMedia->url() }}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain"></video>@else<img src="{{ $artwork->primaryMedia->url() }}" alt="{{ $artwork->title }}">@endif
+                        @if ($artwork->primaryMedia->kind === 'video')
+                            <video src="{{ $artwork->primaryMedia->url() }}" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain"></video>
+                        @else
+                            <img src="{{ $artwork->primaryMedia->url() }}" alt="{{ $artwork->title }}">
+                        @endif
                     @else
                         <div class="ma-artwork-thumb--placeholder">Content {{ $slot }} artwork not assigned</div>
                     @endif
