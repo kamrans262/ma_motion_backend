@@ -608,6 +608,24 @@ h1, h2, h3, h4, .ma-brand strong, .ma-button, .ma-topbar__title {
     margin: 0;
     accent-color: var(--ma-purple);
 }
+
+/* Maker profile visibility settings: compact, aligned controls instead of full-width form inputs. */
+.ma-maker-visibility-option {
+    display: flex;
+    align-items: center;
+    gap: var(--ma-space-3);
+    min-height: 44px;
+    color: var(--ma-text-soft);
+    cursor: pointer;
+}
+.ma-maker-visibility-option input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    margin: 0;
+    accent-color: var(--ma-purple);
+    cursor: pointer;
+}
 .ma-form-actions > form { margin: 0; }
 
 @media (max-width: 720px) {
