@@ -37,20 +37,20 @@
             </div>
 
             <div class="ma-form-grid">
-                <label class="ma-field">
-                    <span>Show website on info page</span>
+                <label class="ma-maker-visibility-option">
                     <input type="hidden" name="show_website_on_info_page" value="0">
                     <input type="checkbox" name="show_website_on_info_page" value="1" @checked((bool) old('show_website_on_info_page', $maker->makerProfile?->show_website_on_info_page ?? true))>
+                    <span>Show website on info page</span>
                 </label>
-                <label class="ma-field">
-                    <span>Show email on info page</span>
+                <label class="ma-maker-visibility-option">
                     <input type="hidden" name="show_email_on_info_page" value="0">
                     <input type="checkbox" name="show_email_on_info_page" value="1" @checked((bool) old('show_email_on_info_page', $maker->makerProfile?->show_email_on_info_page ?? false))>
+                    <span>Show email on info page</span>
                 </label>
-                <label class="ma-field">
-                    <span>Show shows on info page</span>
+                <label class="ma-maker-visibility-option">
                     <input type="hidden" name="show_shows_on_info_page" value="0">
                     <input type="checkbox" name="show_shows_on_info_page" value="1" @checked((bool) old('show_shows_on_info_page', $maker->makerProfile?->show_shows_on_info_page ?? true))>
+                    <span>Show shows on info page</span>
                 </label>
             </div>
 
@@ -97,7 +97,7 @@
                 @if ($maker->makerProfile?->profile_image_path)
                     <form method="POST" action="{{ route('admin.makers.profile-image.destroy', $maker) }}">
                         @csrf @method('DELETE')
-                        <button class="ma-button ma-button--outline" type="submit">Remove salon image</button>
+                        <button class="ma-button ma-button--outline ma-button--full" type="submit">Remove salon image</button>
                     </form>
                 @endif
             </div>
