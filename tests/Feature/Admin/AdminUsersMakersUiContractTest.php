@@ -18,4 +18,18 @@ class AdminUsersMakersUiContractTest extends TestCase
         $this->assertStringContainsString('"Instrument Sans", Arial, sans-serif', $css);
         $this->assertStringContainsString('font-family: Arial, Helvetica, sans-serif;', $css);
     }
+
+    public function test_maker_profile_visibility_controls_and_salon_remove_button_are_aligned(): void
+    {
+        $css = File::get(public_path('assets/admin/css/admin.css'));
+        $view = File::get(resource_path('views/admin/makers/show.blade.php'));
+
+        $this->assertStringContainsString('.ma-maker-visibility-option input[type="checkbox"]', $css);
+        $this->assertStringContainsString('width: 20px;', $css);
+        $this->assertSame(3, substr_count($view, '<label class="ma-maker-visibility-option">'));
+        $this->assertStringContainsString('ma-button ma-button--outline ma-button--full" type="submit">Remove salon image', $view);
+        $this->assertStringContainsString('name="show_website_on_info_page" value="0"', $view);
+        $this->assertStringContainsString('name="show_email_on_info_page" value="0"', $view);
+        $this->assertStringContainsString('name="show_shows_on_info_page" value="0"', $view);
+    }
 }
