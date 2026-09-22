@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>MA Motion verification</title>
 </head>
-<body style="margin:0;padding:32px 12px;background:#0F2419;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#FFFFFF;">
+<body style="margin:0;padding:32px 12px;background:#0F2419;font-family:'Helvetica Neue LT Std','Helvetica Neue',Helvetica,Arial,sans-serif;color:#FFFFFF;">
     <div style="display:none;font-size:1px;color:#0F2419;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Your MA Motion verification code expires in {{ $minutes }} minutes.</div>
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:560px;margin:0 auto;background:#0F2419;border-collapse:collapse;">
         <tr><td style="padding:32px 26px 16px;text-align:center;color:#904AFF;font-size:20px;font-weight:600;letter-spacing:1px;">MA MOTION</td></tr>
