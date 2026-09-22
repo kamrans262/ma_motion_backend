@@ -8,6 +8,8 @@ use App\Features\Auth\Http\Controllers\Api\V1\LogoutController;
 use App\Features\Auth\Http\Controllers\Api\V1\MakerOnboardingRegisterController;
 use App\Features\Auth\Http\Controllers\Api\V1\MeController;
 use App\Features\Auth\Http\Controllers\Api\V1\RegisterController;
+use App\Features\Auth\Http\Controllers\Api\V1\RequestEmailOtpController;
+use App\Features\Auth\Http\Controllers\Api\V1\VerifyEmailOtpController;
 use App\Features\Auth\Http\Controllers\Api\V1\ResetPasswordController;
 use App\Features\Auth\Http\Controllers\Api\V1\SocialLoginController;
 use App\Features\Auth\Http\Controllers\Api\V1\StartMakerExperienceOnboardingController;
@@ -15,6 +17,8 @@ use App\Features\Auth\Http\Controllers\Api\V1\SwitchExperienceController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->name('auth.')->group(function (): void {
+    Route::post('/email-otp/request', RequestEmailOtpController::class)->middleware('throttle:auth-otp-request')->name('email-otp.request');
+    Route::post('/email-otp/verify', VerifyEmailOtpController::class)->middleware('throttle:auth-otp-verify')->name('email-otp.verify');
     Route::post('/register', RegisterController::class)->middleware('throttle:auth-register')->name('register');
     Route::post('/maker-onboarding', MakerOnboardingRegisterController::class)->middleware('throttle:auth-register')->name('maker-onboarding');
     Route::post('/appreciator-onboarding', AppreciatorOnboardingRegisterController::class)->middleware('throttle:auth-register')->name('appreciator-onboarding');

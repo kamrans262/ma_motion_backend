@@ -29,6 +29,12 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('auth-password', static fn (Request $request): Limit => Limit::perMinute(3)->by($request->ip()));
 
+        RateLimiter::for('auth-otp-request', static fn (Request $request): array => [
+            Limit::perMinute(5)->by('ip:'.$request->ip()),
+            Limit::perHour(6)->by('email:'.hash('sha256', Str::lower(trim((string) $request->input('email'))))),
+        ]);
+        RateLimiter::for('auth-otp-verify', static fn (Request $request): Limit => Limit::perMinute(10)->by($request->ip()));
+
         // Preserved from the verified Admin foundation (Milestone 04+).
         // M15 extends rate limiting; it must never replace/remove existing named limiters.
         RateLimiter::for('admin-login', static function (Request $request): Limit {

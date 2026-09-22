@@ -33,6 +33,7 @@ final class AppreciatorOnboardingRegisterRequest extends FormRequest
             'email' => ['required', 'email:rfc', 'max:255', 'unique:users,email'],
             'location_text' => ['required', 'string', 'max:180'],
             'location_id' => ['nullable', 'integer', $activeLocation],
+            'otp_challenge_id' => ['nullable', 'uuid'],
             'device_name' => ['nullable', 'string', 'max:100'],
         ];
     }

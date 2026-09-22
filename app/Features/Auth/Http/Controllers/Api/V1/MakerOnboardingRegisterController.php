@@ -5,17 +5,31 @@ namespace App\Features\Auth\Http\Controllers\Api\V1;
 use App\Features\Auth\Actions\RegisterMakerOnboardingAction;
 use App\Features\Auth\Http\Requests\MakerOnboardingRegisterRequest;
 use App\Features\Auth\Http\Resources\UserResource;
+use App\Features\Auth\Services\EmailOtpService;
 use App\Http\Controllers\Controller;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 final class MakerOnboardingRegisterController extends Controller
 {
     public function __invoke(
         MakerOnboardingRegisterRequest $request,
         RegisterMakerOnboardingAction $action,
+        EmailOtpService $otp,
     ): JsonResponse {
-        $result = $action->execute($request->validated());
+        $data = $request->validated();
+        $id = $data['otp_challenge_id'] ?? null;
+        $result = DB::transaction(function () use ($action, $otp, $data, $id): array {
+            if ($id !== null || config('auth_otp.require_onboarding_verification')) {
+                $otp->consumeRegistrationProof($id, $data['email']);
+            }
+            $created = $action->execute($data);
+            if ($id !== null) {
+                $created['user']->forceFill(['email_verified_at' => now()])->save();
+            }
+            return $created;
+        });
 
         return ApiResponse::success(
             data: [

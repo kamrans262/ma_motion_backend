@@ -25,6 +25,7 @@ final class MakerOnboardingRegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email:rfc', 'max:255', 'unique:users,email'],
+            'otp_challenge_id' => ['nullable', 'uuid'],
             'device_name' => ['nullable', 'string', 'max:100'],
         ];
     }
