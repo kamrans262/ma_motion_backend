@@ -24,10 +24,12 @@ final class MakerOnboardingRegisterController extends Controller
             if ($id !== null || config('auth_otp.require_onboarding_verification')) {
                 $otp->consumeRegistrationProof($id, $data['email']);
             }
+
             $created = $action->execute($data);
             if ($id !== null) {
                 $created['user']->forceFill(['email_verified_at' => now()])->save();
             }
+
             return $created;
         });
 
