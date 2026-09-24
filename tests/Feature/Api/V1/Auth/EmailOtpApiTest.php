@@ -90,6 +90,24 @@ class EmailOtpApiTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('code');
     }
 
+    public function test_inactive_account_cannot_request_login_otp(): void
+    {
+        Mail::fake();
+        User::factory()->create([
+            'email' => 'inactive@example.com',
+            'status' => UserStatus::Inactive,
+        ]);
+
+        $this->postJson('/api/v1/auth/email-otp/request', [
+            'email' => 'inactive@example.com', 'purpose' => 'login',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('email')
+            ->assertJsonPath('errors.email.0', 'This account is not active. Please contact support.');
+
+        Mail::assertNothingSent();
+        $this->assertDatabaseCount('email_otp_challenges', 0);
+    }
+
     public function test_unknown_login_does_not_send_email_or_create_an_account(): void
     {
         Mail::fake();
