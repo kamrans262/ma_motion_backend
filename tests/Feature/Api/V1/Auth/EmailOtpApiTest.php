@@ -95,8 +95,11 @@ class EmailOtpApiTest extends TestCase
         Mail::fake();
         $this->postJson('/api/v1/auth/email-otp/request', [
             'email' => 'unknown@example.com', 'purpose' => 'login',
-        ])->assertOk()->assertJsonStructure(['data' => ['challenge_id']]);
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('email')
+            ->assertJsonPath('errors.email.0', 'This email is not registered. Please create an account to continue.');
         Mail::assertNothingSent();
         $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('email_otp_challenges', 0);
     }
 }
