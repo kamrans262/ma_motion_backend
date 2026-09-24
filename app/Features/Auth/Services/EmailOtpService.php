@@ -21,6 +21,21 @@ final class EmailOtpService
             throw ValidationException::withMessages(['email' => 'Please use the email address for your current account.']);
         }
 
+        // Login is available only to existing active accounts. Reject unknown
+        // emails before creating a challenge, starting a cooldown, or sending mail.
+        $user = User::query()->where('email', $email)->first();
+        if ($purpose === 'login' && $user === null) {
+            throw ValidationException::withMessages([
+                'email' => 'This email is not registered. Please create an account to continue.',
+            ]);
+        }
+
+        if ($purpose === 'login' && ! $user->isActive()) {
+            throw ValidationException::withMessages([
+                'email' => 'This account is not active. Please contact support.',
+            ]);
+        }
+
         $cooldownKey = 'auth:otp:cooldown:'.hash('sha256', $email.'|'.$purpose);
         if (! Cache::add($cooldownKey, true, (int) config('auth_otp.resend_seconds', 60))) {
             throw ValidationException::withMessages(['email' => 'Please wait before requesting another code.']);
@@ -40,7 +55,6 @@ final class EmailOtpService
             'updated_at' => now(),
         ]);
 
-        $user = User::query()->where('email', $email)->first();
         $shouldSend = match ($purpose) {
             'login' => $user !== null && $user->isActive(),
             'register' => $user === null,
