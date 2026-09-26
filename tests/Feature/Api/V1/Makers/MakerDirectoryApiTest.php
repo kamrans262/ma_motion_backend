@@ -43,6 +43,26 @@ class MakerDirectoryApiTest extends TestCase
             ->assertJsonPath('data.bio', 'Maker biography');
     }
 
+    public function test_hidden_maker_is_not_exposed_in_directory_or_detail(): void
+    {
+        $maker = User::factory()->create([
+            'name' => 'Hidden By Maker',
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $maker->makerProfile()->create([
+            'bio' => 'Private for now',
+            'is_hidden' => true,
+        ]);
+
+        $this->getJson('/api/v1/makers?search=Hidden%20By%20Maker')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+
+        $this->getJson('/api/v1/makers/'.$maker->id)
+            ->assertNotFound();
+    }
+
     public function test_inactive_or_non_maker_detail_is_not_exposed(): void
     {
         $inactive = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Inactive]);
