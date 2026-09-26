@@ -4,7 +4,6 @@ namespace App\Features\Auth\Actions;
 
 use App\Features\Auth\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final class SwitchUserExperienceAction
@@ -19,5 +18,4 @@ final class SwitchUserExperienceAction
 
         return $user->refresh()->loadMissing(['makerProfile', 'appreciatorProfile']);
     }
-
 }
