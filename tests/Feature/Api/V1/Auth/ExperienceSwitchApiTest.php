@@ -108,7 +108,7 @@ class ExperienceSwitchApiTest extends TestCase
                 'email' => $user->email,
                 'location_text' => 'Chicago',
             ])
-            ->assertForbidden();
+            ->assertNotFound();
 
         $this->assertSame(UserRole::Maker, $user->fresh()->role);
         $this->assertDatabaseCount('maker_profiles', 1);
