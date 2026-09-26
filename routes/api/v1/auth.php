@@ -1,7 +1,6 @@
 <?php
 
 use App\Features\Auth\Http\Controllers\Api\V1\AppreciatorOnboardingRegisterController;
-use App\Features\Auth\Http\Controllers\Api\V1\CompleteAppreciatorExperienceOnboardingController;
 use App\Features\Auth\Http\Controllers\Api\V1\ForgotPasswordController;
 use App\Features\Auth\Http\Controllers\Api\V1\LoginController;
 use App\Features\Auth\Http\Controllers\Api\V1\LogoutController;
@@ -31,8 +30,5 @@ Route::middleware(['auth:sanctum', 'account.active'])->group(function (): void {
     Route::get('/me', MeController::class)->name('me');
     Route::post('/me/experience/maker/onboarding', StartMakerExperienceOnboardingController::class)
         ->name('me.experience.maker.onboarding');
-    Route::post('/me/experience/appreciator/onboarding', CompleteAppreciatorExperienceOnboardingController::class)
-        ->middleware('role:appreciator')
-        ->name('me.experience.appreciator.onboarding');
     Route::post('/auth/logout', LogoutController::class)->name('auth.logout');
 });
