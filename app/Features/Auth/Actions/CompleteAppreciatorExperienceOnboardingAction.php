@@ -5,6 +5,7 @@ namespace App\Features\Auth\Actions;
 use App\Features\Auth\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 final class CompleteAppreciatorExperienceOnboardingAction
 {
@@ -14,8 +15,12 @@ final class CompleteAppreciatorExperienceOnboardingAction
     public function execute(User $user, array $data): User
     {
         return DB::transaction(function () use ($user, $data): User {
-            // Appreciator onboarding belongs to the same authenticated user.
-            // Persist edited shared fields, without issuing another account/token.
+            if ($user->role !== UserRole::Appreciator) {
+                throw ValidationException::withMessages([
+                    'role' => ['Only an Appreciator account can update Appreciator onboarding.'],
+                ]);
+            }
+
             $user->update([
                 'name' => trim($data['name']),
                 'email' => mb_strtolower(trim($data['email'])),
@@ -36,10 +41,6 @@ final class CompleteAppreciatorExperienceOnboardingAction
                     'onboarding_completed_at' => $existing?->onboarding_completed_at ?? now(),
                 ],
             );
-
-            if ($user->role !== UserRole::Appreciator) {
-                $user->update(['role' => UserRole::Appreciator]);
-            }
 
             return $user->refresh()->loadMissing(['makerProfile', 'appreciatorProfile']);
         });
