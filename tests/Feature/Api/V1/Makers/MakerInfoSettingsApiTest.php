@@ -32,13 +32,15 @@ final class MakerInfoSettingsApiTest extends TestCase
                 'show_website_on_info_page' => false,
                 'show_email_on_info_page' => true,
                 'show_shows_on_info_page' => false,
+                'is_hidden' => true,
                 'website_url' => 'https://artist.example',
                 'contact_email' => 'hello@artist.example',
             ])
             ->assertOk()
             ->assertJsonPath('data.show_website_on_info_page', false)
             ->assertJsonPath('data.show_email_on_info_page', true)
-            ->assertJsonPath('data.show_shows_on_info_page', false);
+            ->assertJsonPath('data.show_shows_on_info_page', false)
+            ->assertJsonPath('data.is_hidden', true);
 
         $this->withToken($token)
             ->post('/api/v1/me/maker-profile/carousel/1', [
@@ -61,6 +63,7 @@ final class MakerInfoSettingsApiTest extends TestCase
             'show_website_on_info_page' => 0,
             'show_email_on_info_page' => 1,
             'show_shows_on_info_page' => 0,
+            'is_hidden' => 1,
         ]);
     }
 
