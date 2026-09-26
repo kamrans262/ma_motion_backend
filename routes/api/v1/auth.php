@@ -12,7 +12,6 @@ use App\Features\Auth\Http\Controllers\Api\V1\RequestEmailOtpController;
 use App\Features\Auth\Http\Controllers\Api\V1\ResetPasswordController;
 use App\Features\Auth\Http\Controllers\Api\V1\SocialLoginController;
 use App\Features\Auth\Http\Controllers\Api\V1\StartMakerExperienceOnboardingController;
-use App\Features\Auth\Http\Controllers\Api\V1\SwitchExperienceController;
 use App\Features\Auth\Http\Controllers\Api\V1\VerifyEmailOtpController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,10 +29,10 @@ Route::prefix('auth')->name('auth.')->group(function (): void {
 
 Route::middleware(['auth:sanctum', 'account.active'])->group(function (): void {
     Route::get('/me', MeController::class)->name('me');
-    Route::patch('/me/experience', SwitchExperienceController::class)->name('me.experience.switch');
     Route::post('/me/experience/maker/onboarding', StartMakerExperienceOnboardingController::class)
         ->name('me.experience.maker.onboarding');
     Route::post('/me/experience/appreciator/onboarding', CompleteAppreciatorExperienceOnboardingController::class)
+        ->middleware('role:appreciator')
         ->name('me.experience.appreciator.onboarding');
     Route::post('/auth/logout', LogoutController::class)->name('auth.logout');
 });
