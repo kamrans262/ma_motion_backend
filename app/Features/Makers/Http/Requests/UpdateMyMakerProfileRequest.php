@@ -61,6 +61,7 @@ final class UpdateMyMakerProfileRequest extends FormRequest
             'show_website_on_info_page' => ['sometimes', 'boolean'],
             'show_email_on_info_page' => ['sometimes', 'boolean'],
             'show_shows_on_info_page' => ['sometimes', 'boolean'],
+            'is_hidden' => ['sometimes', 'boolean'],
             'type_ids' => ['sometimes', 'array', 'min:1', 'max:20'],
             'type_ids.*' => ['integer', 'distinct', $activeType],
             'style_ids' => ['sometimes', 'array', 'min:1', 'max:20'],
