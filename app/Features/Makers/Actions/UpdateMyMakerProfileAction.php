@@ -28,6 +28,7 @@ final class UpdateMyMakerProfileAction
                 'show_website_on_info_page',
                 'show_email_on_info_page',
                 'show_shows_on_info_page',
+                'is_hidden',
             ] as $key) {
                 if (! array_key_exists($key, $data)) {
                     continue;
