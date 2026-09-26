@@ -13,7 +13,7 @@ final class EmailOtpCodeMail extends Mailable
 
     public function build(): static
     {
-        return $this->subject('Your MA Motion verification code')
+        return $this->subject('Your MA Verification Code')
             ->view('emails.auth-otp-code')
             ->with([
                 'code' => $this->code,

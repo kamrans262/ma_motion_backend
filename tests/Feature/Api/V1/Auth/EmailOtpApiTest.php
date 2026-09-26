@@ -14,6 +14,19 @@ class EmailOtpApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_email_otp_mail_uses_ma_branding(): void
+    {
+        $mail = new EmailOtpCodeMail('511615', 'login');
+        $mail->build();
+
+        $this->assertSame('Your MA Verification Code', $mail->subject);
+
+        $html = $mail->render();
+        $this->assertStringContainsString('>MA</td>', $html);
+        $this->assertStringContainsString('Enter this one-time code in MA to continue.', $html);
+        $this->assertStringNotContainsString('MA Motion', $html);
+    }
+
     public function test_registration_requires_verified_email_and_issues_session_only_after_registration(): void
     {
         Mail::fake();
