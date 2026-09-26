@@ -45,6 +45,13 @@ final class PublicShowService
         return User::query()
             ->where('role', UserRole::Maker->value)
             ->where('status', UserStatus::Active->value)
+            ->where(static function ($visibility): void {
+                $visibility
+                    ->whereDoesntHave('makerProfile')
+                    ->orWhereHas('makerProfile', static function ($profileQuery): void {
+                        $profileQuery->where('is_hidden', false);
+                    });
+            })
             ->where(static function ($query): void {
                 $query
                     ->whereDoesntHave('makerProfile')
