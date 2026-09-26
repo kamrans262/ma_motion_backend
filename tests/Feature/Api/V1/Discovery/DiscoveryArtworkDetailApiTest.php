@@ -132,6 +132,32 @@ final class DiscoveryArtworkDetailApiTest extends TestCase
             ->assertJsonMissing(['contact_email' => 'private@example.com']);
     }
 
+    public function test_hidden_maker_artwork_is_not_publicly_exposed(): void
+    {
+        $maker = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $maker->makerProfile()->create([
+            'is_hidden' => true,
+        ]);
+
+        $artwork = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Hidden Maker Artwork',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+
+        $this->getJson('/api/v1/discovery/artworks/'.$artwork->id)
+            ->assertNotFound();
+
+        $this->getJson('/api/v1/discovery/artworks')
+            ->assertOk()
+            ->assertJsonMissing(['id' => $artwork->id]);
+    }
+
     public function test_hidden_pending_or_inactive_maker_artwork_is_not_publicly_exposed(): void
     {
         $activeMaker = User::factory()->create([
