@@ -7,12 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Support\Api\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 final class RequestEmailOtpController extends Controller
 {
     public function __invoke(Request $request, EmailOtpService $service): JsonResponse
     {
+        $request->merge([
+            'email' => Str::lower(trim((string) $request->input('email'))),
+        ]);
+
         $data = $request->validate([
             'email' => ['required', 'email:rfc', 'max:255'],
             'purpose' => ['required', Rule::in(['login', 'register', 'confirm'])],
