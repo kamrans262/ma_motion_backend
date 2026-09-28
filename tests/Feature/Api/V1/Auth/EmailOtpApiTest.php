@@ -67,6 +67,43 @@ class EmailOtpApiTest extends TestCase
         $this->assertNotNull(\Illuminate\Support\Facades\DB::table('email_otp_challenges')->where('id', $id)->value('consumed_at'));
     }
 
+    public function test_existing_accounts_cannot_request_registration_otp(): void
+    {
+        Mail::fake();
+
+        User::factory()->create([
+            'email' => 'maker@example.com',
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+
+        User::factory()->create([
+            'email' => 'appreciator@example.com',
+            'role' => UserRole::Appreciator,
+            'status' => UserStatus::Active,
+        ]);
+
+        foreach (['  MAKER@EXAMPLE.COM  ', 'appreciator@example.com'] as $email) {
+            $this->postJson('/api/v1/auth/email-otp/request', [
+                'email' => $email,
+                'purpose' => 'register',
+            ])
+                ->assertStatus(409)
+                ->assertJsonPath('code', 'account_already_exists')
+                ->assertJsonPath(
+                    'message',
+                    'An account already exists with this email. Please log in instead.',
+                )
+                ->assertJsonPath(
+                    'errors.email.0',
+                    'An account already exists with this email. Please log in instead.',
+                );
+        }
+
+        Mail::assertNothingSent();
+        $this->assertDatabaseCount('email_otp_challenges', 0);
+    }
+
     public function test_existing_user_logs_in_with_email_code_without_password(): void
     {
         Mail::fake();
