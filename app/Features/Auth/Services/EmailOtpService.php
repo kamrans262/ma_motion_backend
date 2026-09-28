@@ -2,6 +2,7 @@
 
 namespace App\Features\Auth\Services;
 
+use App\Features\Auth\Exceptions\AccountAlreadyExistsException;
 use App\Features\Auth\Mail\EmailOtpCodeMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
@@ -24,6 +25,13 @@ final class EmailOtpService
         // Login is available only to existing active accounts. Reject unknown
         // emails before creating a challenge, starting a cooldown, or sending mail.
         $user = User::query()->where('email', $email)->first();
+
+        // Registration must fail before a challenge/cooldown is created so the
+        // client never opens the OTP screen for an email that already owns an account.
+        if ($purpose === 'register' && $user !== null) {
+            throw new AccountAlreadyExistsException;
+        }
+
         if ($purpose === 'login' && $user === null) {
             throw ValidationException::withMessages([
                 'email' => 'This email is not registered. Please create an account to continue.',
