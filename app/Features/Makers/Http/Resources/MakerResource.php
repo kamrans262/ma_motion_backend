@@ -18,6 +18,9 @@ final class MakerResource extends JsonResource
             'name' => $this->name,
             'bio' => $profile?->bio,
             'location' => $profile?->location_text,
+            'current_upcoming_shows' => ($profile?->show_shows_on_info_page ?? true)
+                ? ($profile?->current_upcoming_shows ?? [])
+                : [],
             'profile_image_url' => $profile?->profile_image_path
                 ? Storage::disk('public')->url($profile->profile_image_path)
                 : null,
