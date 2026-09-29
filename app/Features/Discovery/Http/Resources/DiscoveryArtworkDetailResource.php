@@ -92,6 +92,9 @@ final class DiscoveryArtworkDetailResource extends JsonResource
                     ? $makerProfile?->contact_email
                     : null,
                 'show_shows_on_info_page' => $makerProfile?->show_shows_on_info_page ?? true,
+                'current_upcoming_shows' => ($makerProfile?->show_shows_on_info_page ?? true)
+                    ? ($makerProfile?->current_upcoming_shows ?? [])
+                    : [],
                 'saved_count' => (int) ($this->maker->saves_count ?? 0),
             ] : null,
             'created_at' => $this->created_at?->toISOString(),
