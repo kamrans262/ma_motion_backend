@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'show_website_on_info_page',
     'show_email_on_info_page',
     'show_shows_on_info_page',
+    'current_upcoming_shows',
     'is_hidden',
     'onboarding_completed_at',
 ])]
@@ -34,6 +35,7 @@ final class MakerProfile extends Model
             'show_website_on_info_page' => 'boolean',
             'show_email_on_info_page' => 'boolean',
             'show_shows_on_info_page' => 'boolean',
+            'current_upcoming_shows' => 'array',
             'is_hidden' => 'boolean',
             'onboarding_completed_at' => 'datetime',
         ];
