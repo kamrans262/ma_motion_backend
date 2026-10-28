@@ -27,9 +27,9 @@ class AdminFeaturedMakerUiContractTest extends TestCase
         $sidebar = file_get_contents(resource_path('views/admin/partials/sidebar.blade.php'));
         $css = file_get_contents(public_path('assets/admin/css/admin.css'));
 
-        $this->assertStringContainsString("admin.featured-maker.index", $sidebar);
-        $this->assertStringContainsString('<span>Featured Maker</span>', $sidebar);
-        $this->assertStringNotContainsString('<span>Featured Maker</span><span class="ma-nav__soon">Soon</span>', $sidebar);
+        // Keep the backend page functional, but do not expose it in the admin sidebar.
+        $this->assertStringNotContainsString("admin.featured-maker.index", $sidebar);
+        $this->assertStringNotContainsString('<span>Featured Maker</span>', $sidebar);
         $this->assertStringContainsString('scrollbar-gutter: stable', $css);
         $this->assertStringContainsString('.ma-nav::-webkit-scrollbar-thumb', $css);
         $this->assertStringContainsString('.ma-featured-maker-preview', $css);
