@@ -23,7 +23,9 @@ final class AdminContentSettingsUiContractTest extends TestCase
 
         $sidebar = file_get_contents(resource_path('views/admin/partials/sidebar.blade.php'));
         $css = file_get_contents(public_path('assets/admin/css/admin.css'));
-        $this->assertStringContainsString('admin.content.index', $sidebar);
+        // Content routes remain functional but are not linked in the sidebar.
+        $this->assertStringNotContainsString('admin.content.index', $sidebar);
+        $this->assertStringNotContainsString('<span>Content</span>', $sidebar);
         $this->assertStringContainsString('admin.settings.index', $sidebar);
         $this->assertStringContainsString('.ma-content-grid', $css);
         $this->assertStringContainsString('.ma-content-title-slug-grid { align-items: start; }', $css);
