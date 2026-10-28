@@ -11,6 +11,9 @@ return new class extends Migration
         Schema::create('push_device_tokens', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            // Deleting a Sanctum session also revokes the push registration.
+            $table->foreignId('personal_access_token_id')->nullable()
+                ->constrained('personal_access_tokens')->cascadeOnDelete();
             // FCM tokens may exceed indexable varchar lengths; index a SHA-256 digest.
             $table->char('token_hash', 64)->unique();
             $table->text('token');
