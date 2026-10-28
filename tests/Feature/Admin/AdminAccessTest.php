@@ -17,6 +17,20 @@ class AdminAccessTest extends TestCase
         $this->get('/admin')->assertRedirect(route('admin.login'));
     }
 
+    public function test_active_admin_opening_site_root_reaches_dashboard(): void
+    {
+        $admin = User::factory()->create([
+            'role' => UserRole::Admin,
+            'status' => UserStatus::Active,
+        ]);
+
+        $this->actingAs($admin)
+            ->followingRedirects()
+            ->get('/')
+            ->assertOk()
+            ->assertSee('MA Motion control center');
+    }
+
     public function test_active_admin_can_access_dashboard(): void
     {
         $admin = User::factory()->create([
