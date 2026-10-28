@@ -22,6 +22,9 @@ final class RegisterPushTokenController extends Controller
             ['token_hash' => hash('sha256', $data['token'])],
             [
                 'user_id' => $request->user()->id,
+                'personal_access_token_id' => method_exists($request->user()->currentAccessToken(), 'getKey')
+                    ? $request->user()->currentAccessToken()->getKey()
+                    : null,
                 'token' => $data['token'],
                 'platform' => $data['platform'],
                 'last_seen_at' => now(),
