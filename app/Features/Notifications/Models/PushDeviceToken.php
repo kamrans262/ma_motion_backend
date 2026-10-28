@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'token_hash', 'token', 'platform', 'last_seen_at'])]
+#[Fillable(['user_id', 'personal_access_token_id', 'token_hash', 'token', 'platform', 'last_seen_at'])]
 final class PushDeviceToken extends Model
 {
     protected function casts(): array
