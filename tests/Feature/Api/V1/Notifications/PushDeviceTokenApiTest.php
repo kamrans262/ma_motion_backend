@@ -67,6 +67,21 @@ final class PushDeviceTokenApiTest extends TestCase
         $this->assertDatabaseCount('push_device_tokens', 0);
     }
 
+    public function test_revoking_a_real_sanctum_session_deletes_its_push_registration(): void
+    {
+        $user = User::factory()->create(['status' => UserStatus::Active]);
+        $bearer = $user->createToken('push-device')->plainTextToken;
+        $this->withToken($bearer)
+            ->postJson('/api/v1/me/push-tokens', [
+                'token' => str_repeat('devicePushToken', 7),
+                'platform' => 'android',
+            ])->assertOk();
+
+        $this->assertDatabaseCount('push_device_tokens', 1);
+        $this->withToken($bearer)->postJson('/api/v1/auth/logout')->assertOk();
+        $this->assertDatabaseCount('push_device_tokens', 0);
+    }
+
     public function test_invalid_platform_and_too_short_token_are_rejected(): void
     {
         $user = User::factory()->create();
