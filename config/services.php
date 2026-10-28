@@ -28,6 +28,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Credentials JSON stays outside public/ and is never committed to Git.
+    'ma_fcm' => [
+        'enabled' => env('MA_FCM_ENABLED', false),
+        'project_id' => env('MA_FCM_PROJECT_ID'),
+        'credentials_path' => env('MA_FCM_CREDENTIALS_PATH'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
