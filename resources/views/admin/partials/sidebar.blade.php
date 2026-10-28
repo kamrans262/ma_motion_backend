@@ -44,12 +44,6 @@
         <a class="ma-nav__item {{ request()->routeIs('admin.types.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.types.index') }}" @if(request()->routeIs('admin.types.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Types</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.styles.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.styles.index') }}" @if(request()->routeIs('admin.styles.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Styles</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.locations.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.locations.index') }}" @if(request()->routeIs('admin.locations.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Locations</span></a>
-        <a class="ma-nav__item {{ request()->routeIs('admin.featured-maker.*') ? 'ma-nav__item--active' : '' }}"
-           href="{{ route('admin.featured-maker.index') }}"
-           @if(request()->routeIs('admin.featured-maker.*')) aria-current="page" @endif>
-            <span class="ma-nav__icon" aria-hidden="true">◆</span>
-            <span>Featured Maker</span>
-        </a>
         <a class="ma-nav__item {{ request()->routeIs('admin.notifications.*') ? 'ma-nav__item--active' : '' }}"
            href="{{ route('admin.notifications.index') }}"
            @if(request()->routeIs('admin.notifications.*')) aria-current="page" @endif>
