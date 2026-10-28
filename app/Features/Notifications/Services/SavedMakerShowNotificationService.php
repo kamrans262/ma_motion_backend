@@ -5,6 +5,7 @@ namespace App\Features\Notifications\Services;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Notifications\Enums\NotificationType;
+use App\Features\Notifications\Jobs\SendPushNotification;
 use App\Features\Notifications\Models\InAppNotification;
 use App\Features\Saves\Models\MakerSave;
 use App\Features\Shows\Enums\ShowStatus;
@@ -66,6 +67,10 @@ final class SavedMakerShowNotificationService
 
             if ($notification->wasRecentlyCreated) {
                 $created++;
+                // Dispatch synchronously after the HTTP response: no worker required on shared hosting.
+                if (config('services.ma_fcm.enabled')) {
+                    SendPushNotification::dispatchAfterResponse($notification->id);
+                }
             }
         }
 
