@@ -52,7 +52,6 @@
         </a>
 
         <p class="ma-nav__label">System</p>
-        <a class="ma-nav__item {{ request()->routeIs('admin.content.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.content.index') }}" @if(request()->routeIs('admin.content.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Content</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.analytics.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.analytics.index') }}" @if(request()->routeIs('admin.analytics.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Analytics</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.settings.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.settings.index') }}" @if(request()->routeIs('admin.settings.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Settings</span></a>
         <a class="ma-nav__item {{ request()->routeIs('admin.audit-logs.*') ? 'ma-nav__item--active' : '' }}" href="{{ route('admin.audit-logs.index') }}" @if(request()->routeIs('admin.audit-logs.*')) aria-current="page" @endif><span class="ma-nav__icon" aria-hidden="true">◆</span><span>Audit Logs</span></a>
