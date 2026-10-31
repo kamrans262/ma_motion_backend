@@ -67,6 +67,37 @@ final class MakerInfoSettingsApiTest extends TestCase
         ]);
     }
 
+    public function test_show_description_and_location_are_independently_optional(): void
+    {
+        $maker = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $token = $maker->createToken('mobile', ['mobile'])->plainTextToken;
+
+        $this->withToken($token)
+            ->patchJson('/api/v1/me/maker-profile', [
+                'current_upcoming_shows' => [
+                    ['description' => 'Solo exhibition'],
+                    ['location' => 'New York, NY'],
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.current_upcoming_shows.0.description', 'Solo exhibition')
+            ->assertJsonPath('data.current_upcoming_shows.1.location', 'New York, NY');
+
+        $this->withToken($token)
+            ->patchJson('/api/v1/me/maker-profile', [
+                'current_upcoming_shows' => [
+                    ['description' => '', 'location' => 'Brooklyn, NY'],
+                    ['description' => 'Autumn display', 'location' => ''],
+                ],
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.current_upcoming_shows.0.location', 'Brooklyn, NY')
+            ->assertJsonPath('data.current_upcoming_shows.1.description', 'Autumn display');
+    }
+
     public function test_content_slot_can_be_replaced_caption_updated_and_deleted_with_storage_cleanup(): void
     {
         Storage::fake('public');
