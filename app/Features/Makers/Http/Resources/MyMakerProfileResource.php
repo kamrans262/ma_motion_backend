@@ -41,6 +41,7 @@ final class MyMakerProfileResource extends JsonResource
             'show_website_on_info_page' => $profile?->show_website_on_info_page ?? true,
             'show_email_on_info_page' => $profile?->show_email_on_info_page ?? false,
             'show_shows_on_info_page' => $profile?->show_shows_on_info_page ?? true,
+            'current_upcoming_shows' => $profile?->current_upcoming_shows ?? [],
             'types' => $types->map(static fn ($type): array => [
                 'id' => $type->id,
                 'name' => $type->name,

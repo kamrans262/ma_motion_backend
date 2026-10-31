@@ -43,6 +43,24 @@ final class UpdateMyMakerProfileAction
                 $profileData[$key] = $value;
             }
 
+            if (array_key_exists('current_upcoming_shows', $data)) {
+                $shows = [];
+                foreach ($data['current_upcoming_shows'] as $show) {
+                    $description = trim((string) ($show['description'] ?? ''));
+                    $location = trim((string) ($show['location'] ?? ''));
+
+                    if ($description === '' && $location === '') {
+                        continue;
+                    }
+
+                    $shows[] = [
+                        'description' => $description,
+                        'location' => $location,
+                    ];
+                }
+                $profileData['current_upcoming_shows'] = $shows;
+            }
+
             if (($data['complete_onboarding'] ?? false) === true) {
                 $profileData['onboarding_completed_at'] = now();
             }

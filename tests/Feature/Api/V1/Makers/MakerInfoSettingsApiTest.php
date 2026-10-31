@@ -51,6 +51,67 @@ final class MakerInfoSettingsApiTest extends TestCase
         ]);
     }
 
+    public function test_show_entries_allow_either_description_or_location_and_skip_empty_rows(): void
+    {
+        $maker = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+            'name' => 'Example Artist',
+        ]);
+
+        $shows = [
+            ['description' => 'Autumn exhibition', 'location' => ''],
+            ['description' => '', 'location' => 'Brooklyn, NY'],
+            ['description' => '  ', 'location' => '  '],
+        ];
+
+        $this->actingAs($maker, 'sanctum')
+            ->patchJson('/api/v1/me/maker-profile', [
+                'current_upcoming_shows' => $shows,
+                'show_shows_on_info_page' => true,
+            ])
+            ->assertOk()
+            ->assertJsonCount(2, 'data.current_upcoming_shows')
+            ->assertJsonPath('data.current_upcoming_shows.0.description', 'Autumn exhibition')
+            ->assertJsonPath('data.current_upcoming_shows.0.location', '')
+            ->assertJsonPath('data.current_upcoming_shows.1.description', '')
+            ->assertJsonPath('data.current_upcoming_shows.1.location', 'Brooklyn, NY');
+
+        $this->actingAs($maker, 'sanctum')
+            ->getJson('/api/v1/me/maker-profile')
+            ->assertOk()
+            ->assertJsonCount(2, 'data.current_upcoming_shows');
+
+        $artwork = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Visible artwork',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+
+        $this->getJson('/api/v1/discovery/artworks/'.$artwork->id)
+            ->assertOk()
+            ->assertJsonPath('data.maker.current_upcoming_shows.0.description', 'Autumn exhibition')
+            ->assertJsonPath('data.maker.current_upcoming_shows.1.location', 'Brooklyn, NY');
+
+        $this->actingAs($maker, 'sanctum')
+            ->patchJson('/api/v1/me/maker-profile', [
+                'show_shows_on_info_page' => false,
+            ])
+            ->assertOk();
+        $this->getJson('/api/v1/discovery/artworks/'.$artwork->id)
+            ->assertOk()
+            ->assertJsonCount(0, 'data.maker.current_upcoming_shows');
+
+        $this->actingAs($maker, 'sanctum')
+            ->patchJson('/api/v1/me/maker-profile', [
+                'current_upcoming_shows' => [],
+            ])
+            ->assertOk()
+            ->assertJsonCount(0, 'data.current_upcoming_shows');
+    }
+
     public function test_maker_can_create_replace_caption_and_delete_three_slot_carousel_content(): void
     {
         Storage::fake('public');

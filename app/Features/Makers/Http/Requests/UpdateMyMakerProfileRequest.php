@@ -61,6 +61,12 @@ final class UpdateMyMakerProfileRequest extends FormRequest
             'show_website_on_info_page' => ['sometimes', 'boolean'],
             'show_email_on_info_page' => ['sometimes', 'boolean'],
             'show_shows_on_info_page' => ['sometimes', 'boolean'],
+            // Each show may have only a description or only a location.
+            // Entries where both are blank are discarded when saving.
+            'current_upcoming_shows' => ['sometimes', 'array', 'max:20'],
+            'current_upcoming_shows.*' => ['array'],
+            'current_upcoming_shows.*.description' => ['nullable', 'string', 'max:2000'],
+            'current_upcoming_shows.*.location' => ['nullable', 'string', 'max:500'],
             'type_ids' => ['sometimes', 'array', 'min:1', 'max:20'],
             'type_ids.*' => ['integer', 'distinct', $activeType],
             'style_ids' => ['sometimes', 'array', 'min:1', 'max:20'],
