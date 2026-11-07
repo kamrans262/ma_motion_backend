@@ -13,6 +13,6 @@ final class AddMediaController extends Controller
     {
         $model = $artworks->findOwned($request->user(), $artwork);
         $model = $action->execute($model, $request->file('media', []));
-        return ApiResponse::success(data: ArtworkResource::make($model)->resolve($request), message: 'Artwork images added successfully and moderation was reset to pending.', status: 201);
+        return ApiResponse::success(data: ArtworkResource::make($model)->resolve($request), message: $model->moderation_status->value === 'pending' ? 'Artwork images added successfully and are pending review.' : 'Artwork images added successfully.', status: 201);
     }
 }

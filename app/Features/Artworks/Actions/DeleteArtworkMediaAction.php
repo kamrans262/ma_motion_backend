@@ -2,7 +2,7 @@
 
 namespace App\Features\Artworks\Actions;
 
-use App\Features\Artworks\Enums\ArtworkModerationStatus;
+use App\Features\Artworks\Services\MakerArtworkApprovalService;
 use App\Features\Artworks\Models\Artwork;
 use App\Features\Artworks\Models\ArtworkMedia;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +11,8 @@ use Illuminate\Validation\ValidationException;
 
 final class DeleteArtworkMediaAction
 {
+    public function __construct(private readonly MakerArtworkApprovalService $approval) {}
+
     public function execute(Artwork $artwork, ArtworkMedia $media, bool $resetModeration = true): Artwork
     {
         abort_unless($media->artwork_id === $artwork->id, 404);
@@ -35,7 +37,7 @@ final class DeleteArtworkMediaAction
 
             if ($resetModeration) {
                 $artwork->forceFill([
-                    'moderation_status' => ArtworkModerationStatus::Pending,
+                    'moderation_status' => $this->approval->statusForEditedArtwork($artwork),
                     'rejection_reason' => null,
                 ])->save();
             }

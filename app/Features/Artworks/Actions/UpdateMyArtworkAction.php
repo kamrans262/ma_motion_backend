@@ -2,12 +2,14 @@
 
 namespace App\Features\Artworks\Actions;
 
-use App\Features\Artworks\Enums\ArtworkModerationStatus;
+use App\Features\Artworks\Services\MakerArtworkApprovalService;
 use App\Features\Artworks\Models\Artwork;
 use App\Features\Artworks\Support\ArtworkData;
 
 final class UpdateMyArtworkAction
 {
+    public function __construct(private readonly MakerArtworkApprovalService $approval) {}
+
     /** @param array<string, mixed> $data */
     public function execute(Artwork $artwork, array $data): Artwork
     {
@@ -21,7 +23,7 @@ final class UpdateMyArtworkAction
             'location_id',
             'location_text',
         ])) {
-            $artwork->moderation_status = ArtworkModerationStatus::Pending;
+            $artwork->moderation_status = $this->approval->statusForEditedArtwork($artwork);
             $artwork->rejection_reason = null;
         }
 

@@ -38,6 +38,7 @@ final class MakerProfile extends Model
             'current_upcoming_shows' => 'array',
             'is_hidden' => 'boolean',
             'onboarding_completed_at' => 'datetime',
+            'artwork_approval_granted_at' => 'datetime',
         ];
     }
 

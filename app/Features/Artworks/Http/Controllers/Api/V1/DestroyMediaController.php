@@ -14,6 +14,6 @@ final class DestroyMediaController extends Controller
         $model = $artworks->findOwned($request->user(), $artwork);
         $mediaModel = $artworks->findOwnedMedia($model, $media);
         $model = $action->execute($model, $mediaModel, true);
-        return ApiResponse::success(data: ArtworkResource::make($model)->resolve($request), message: 'Artwork image removed successfully and moderation was reset to pending.');
+        return ApiResponse::success(data: ArtworkResource::make($model)->resolve($request), message: $model->moderation_status->value === 'pending' ? 'Artwork image removed successfully and changes are pending review.' : 'Artwork image removed successfully.');
     }
 }

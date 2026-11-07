@@ -13,6 +13,6 @@ final class UpdateController extends Controller
     {
         $model = $artworks->findOwned($request->user(), $artwork);
         $model = $action->execute($model, $request->validated());
-        return ApiResponse::success(data: ArtworkResource::make($model)->resolve($request), message: 'Artwork updated successfully and is pending review.');
+        return ApiResponse::success(data: ArtworkResource::make($model)->resolve($request), message: $model->moderation_status->value === 'pending' ? 'Artwork updated successfully and is pending review.' : 'Artwork updated successfully.');
     }
 }
