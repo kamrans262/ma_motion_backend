@@ -15,7 +15,11 @@ final class PublicMakerArtworkService
     /** @return LengthAwarePaginator<int,Artwork> */
     public function paginate(User $maker, int $perPage = 24): LengthAwarePaginator
     {
-        if (! $maker->hasRole(UserRole::Maker) || $maker->status !== UserStatus::Active) {
+        if (
+            ! $maker->hasRole(UserRole::Maker)
+            || $maker->status !== UserStatus::Active
+            || $maker->makerProfile()->where('is_hidden', true)->exists()
+        ) {
             throw (new ModelNotFoundException())->setModel(User::class, [$maker->id]);
         }
 

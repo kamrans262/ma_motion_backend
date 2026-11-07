@@ -3,6 +3,7 @@
 namespace App\Features\Artworks\Services;
 
 use App\Features\Artworks\Models\Artwork;
+use App\Support\Media\FiveSecondVideoGuard;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,8 @@ use Throwable;
 final class ArtworkMediaStorageService
 {
     public const MAX_IMAGES_PER_ARTWORK = 10;
+
+    public function __construct(private readonly FiveSecondVideoGuard $videoGuard) {}
 
     /**
      * @param array<int, UploadedFile> $files
@@ -27,7 +30,7 @@ final class ArtworkMediaStorageService
         $existingCount = $artwork->media()->count();
         if ($existingCount + count($files) > self::MAX_IMAGES_PER_ARTWORK) {
             throw ValidationException::withMessages([
-                'media' => 'An artwork can contain a maximum of '.self::MAX_IMAGES_PER_ARTWORK.' images.',
+                'media' => 'An artwork can contain a maximum of '.self::MAX_IMAGES_PER_ARTWORK.' media files.',
             ]);
         }
 
@@ -41,12 +44,24 @@ final class ArtworkMediaStorageService
                 foreach ($files as $file) {
                     $mime = (string) $file->getMimeType();
                     $extension = $this->extensionForMime($mime);
-                    $dimensions = @getimagesize($file->getRealPath());
+                    $isVideo = str_starts_with($mime, 'video/');
+                    $dimensions = null;
 
-                    if ($dimensions === false) {
-                        throw ValidationException::withMessages([
-                            'media' => 'One of the uploaded files could not be verified as a valid image.',
-                        ]);
+                    if ($isVideo) {
+                        $this->videoGuard->validate($file, 'media');
+                    } else {
+                        if ($file->getSize() > 10 * 1024 * 1024) {
+                            throw ValidationException::withMessages([
+                                'media' => 'Artwork images must be 10 MB or smaller.',
+                            ]);
+                        }
+
+                        $dimensions = @getimagesize($file->getRealPath());
+                        if ($dimensions === false || $dimensions[0] > 12000 || $dimensions[1] > 12000) {
+                            throw ValidationException::withMessages([
+                                'media' => 'Artwork image must be valid and at most 12000 × 12000 pixels.',
+                            ]);
+                        }
                     }
 
                     $directory = 'artworks/'.$artwork->maker_id.'/'.$artwork->id;
@@ -61,13 +76,13 @@ final class ArtworkMediaStorageService
                     $isPrimary = ! $hasPrimary;
 
                     $artwork->media()->create([
-                        'kind' => 'image',
+                        'kind' => $isVideo ? 'video' : 'image',
                         'disk' => 'public',
                         'path' => $path,
                         'mime_type' => $mime,
                         'size_bytes' => (int) $file->getSize(),
-                        'width' => (int) $dimensions[0],
-                        'height' => (int) $dimensions[1],
+                        'width' => $dimensions === null ? null : (int) $dimensions[0],
+                        'height' => $dimensions === null ? null : (int) $dimensions[1],
                         'alt_text' => null,
                         'sort_order' => $nextSortOrder++,
                         'is_primary' => $isPrimary,
@@ -93,8 +108,12 @@ final class ArtworkMediaStorageService
             'image/jpeg', 'image/jpg' => 'jpg',
             'image/png' => 'png',
             'image/webp' => 'webp',
+            'video/mp4' => 'mp4',
+            'video/quicktime' => 'mov',
+            'video/x-m4v' => 'm4v',
+            'video/webm' => 'webm',
             default => throw ValidationException::withMessages([
-                'media' => 'Only JPG, PNG and WebP artwork images are supported.',
+                'media' => 'Only JPG, PNG, WebP images or MP4, MOV, M4V, WebM videos are supported.',
             ]),
         };
     }

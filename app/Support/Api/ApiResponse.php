@@ -39,13 +39,20 @@ final class ApiResponse
         int $status = 400,
         ?array $errors = null,
         array $headers = [],
+        ?string $code = null,
     ): JsonResponse {
-        return response()->json([
+        $payload = [
             'success' => false,
             'message' => $message,
             'data' => null,
             'errors' => $errors,
             'meta' => null,
-        ], $status, $headers);
+        ];
+
+        if ($code !== null) {
+            $payload['code'] = $code;
+        }
+
+        return response()->json($payload, $status, $headers);
     }
 }

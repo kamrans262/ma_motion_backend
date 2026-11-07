@@ -71,14 +71,26 @@ final class ArtworkDiscoveryService
             ->whereHas('maker', static function (Builder $makerQuery): void {
                 $makerQuery
                     ->where('role', UserRole::Maker->value)
-                    ->where('status', UserStatus::Active->value);
+                    ->where('status', UserStatus::Active->value)
+                    ->where(static function ($visibility): void {
+                        $visibility
+                            ->whereDoesntHave('makerProfile')
+                            ->orWhereHas('makerProfile', static function ($profile): void {
+                                $profile->where('is_hidden', false);
+                            });
+                    });
             })
             ->with([
                 'maker' => static function ($makerQuery): void {
                     $makerQuery
                         ->select(['id', 'name', 'role', 'status', 'created_at'])
                         ->with(['makerProfile.location'])
-                        ->withCount(['savedByAppreciators as saves_count']);
+                        ->withCount(['savedByAppreciators as saves_count'])
+                        ->withExists([
+                            'shows as has_visible_current_or_upcoming_show' => static function (Builder $shows): void {
+                                $shows->where('is_visible', true)->currentOrUpcoming();
+                            },
+                        ]);
                 },
                 'type:id,name,slug,is_active',
                 'style:id,name,slug,is_active',

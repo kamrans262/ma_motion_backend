@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'user_id',
@@ -19,6 +20,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
     'profile_image_path',
     'website_url',
     'contact_email',
+    'show_website_on_info_page',
+    'show_email_on_info_page',
+    'show_shows_on_info_page',
+    'current_upcoming_shows',
+    'is_hidden',
     'onboarding_completed_at',
 ])]
 final class MakerProfile extends Model
@@ -26,6 +32,11 @@ final class MakerProfile extends Model
     protected function casts(): array
     {
         return [
+            'show_website_on_info_page' => 'boolean',
+            'show_email_on_info_page' => 'boolean',
+            'show_shows_on_info_page' => 'boolean',
+            'current_upcoming_shows' => 'array',
+            'is_hidden' => 'boolean',
             'onboarding_completed_at' => 'datetime',
         ];
     }
@@ -51,6 +62,18 @@ final class MakerProfile extends Model
             'maker_profile_id',
             'artwork_type_id',
         )->withTimestamps();
+    }
+
+    /** @return HasMany<MakerProfileContent, $this> */
+    public function contents(): HasMany
+    {
+        return $this->hasMany(MakerProfileContent::class)->orderBy('slot');
+    }
+
+    /** @return HasMany<MakerProfileArtworkSlot, $this> */
+    public function artworkSlots(): HasMany
+    {
+        return $this->hasMany(MakerProfileArtworkSlot::class)->orderBy('slot');
     }
 
     /** @return BelongsToMany<ArtworkStyle, $this> */

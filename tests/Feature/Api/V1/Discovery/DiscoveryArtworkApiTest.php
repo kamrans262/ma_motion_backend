@@ -53,6 +53,90 @@ final class DiscoveryArtworkApiTest extends TestCase
         $this->assertArrayNotHasKey('rejection_reason', $response->json('data.0'));
     }
 
+    public function test_discovery_show_indicator_tracks_maker_profile_visibility_and_show_dates(): void
+    {
+        $maker = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $profile = $maker->makerProfile()->create([
+            'show_shows_on_info_page' => true,
+            'current_upcoming_shows' => [],
+        ]);
+        $first = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Artwork one',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+        $second = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Artwork two',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+        $url = '/api/v1/discovery/artworks?per_page=10';
+
+        $response = $this->getJson($url)->assertOk();
+        $this->assertFalse((bool) collect($response->json('data'))->firstWhere('id', $first->id)['maker']['has_current_or_upcoming_show']);
+
+        $profile->update([
+            'current_upcoming_shows' => [
+                ['description' => 'Open studio', 'location' => ''],
+            ],
+        ]);
+        $response = $this->getJson($url)->assertOk();
+        foreach ($response->json('data') as $artwork) {
+            $this->assertTrue($artwork['maker']['has_current_or_upcoming_show']);
+        }
+
+        $profile->update(['show_shows_on_info_page' => false]);
+        $response = $this->getJson($url)->assertOk();
+        foreach ($response->json('data') as $artwork) {
+            $this->assertFalse($artwork['maker']['has_current_or_upcoming_show']);
+        }
+
+        $profile->update([
+            'show_shows_on_info_page' => true,
+            'current_upcoming_shows' => [],
+        ]);
+        $show = Show::query()->create([
+            'maker_id' => $maker->id,
+            'name' => 'Upcoming exhibition',
+            'start_date' => now()->addDay()->toDateString(),
+            'end_date' => now()->addDays(7)->toDateString(),
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+        // A Maker's show indicator applies to all of their artworks,
+        // not only artworks explicitly linked to the exhibition.
+        $this->assertCount(0, $show->artworks);
+        $response = $this->getJson($url)->assertOk();
+        foreach ($response->json('data') as $artwork) {
+            $this->assertTrue($artwork['maker']['has_current_or_upcoming_show']);
+        }
+
+        $show->update(['is_visible' => false]);
+        $response = $this->getJson($url)->assertOk();
+        foreach ($response->json('data') as $artwork) {
+            $this->assertFalse($artwork['maker']['has_current_or_upcoming_show']);
+        }
+
+        $show->update([
+            'is_visible' => true,
+            'start_date' => now()->subDays(8)->toDateString(),
+            'end_date' => now()->subDay()->toDateString(),
+        ]);
+        $response = $this->getJson($url)->assertOk();
+        foreach ($response->json('data') as $artwork) {
+            $this->assertFalse($artwork['maker']['has_current_or_upcoming_show']);
+        }
+
+        $this->assertSame($second->maker_id, $first->maker_id);
+    }
+
     public function test_discovery_artworks_alias_returns_same_public_grid_contract(): void
     {
         $maker = User::factory()->create(['role'=>UserRole::Maker,'status'=>UserStatus::Active]);

@@ -18,13 +18,23 @@ final class ArtworkDetailService
             ->whereHas('maker', static function (Builder $makerQuery): void {
                 $makerQuery
                     ->where('role', UserRole::Maker->value)
-                    ->where('status', UserStatus::Active->value);
+                    ->where('status', UserStatus::Active->value)
+                    ->where(static function ($visibility): void {
+                        $visibility
+                            ->whereDoesntHave('makerProfile')
+                            ->orWhereHas('makerProfile', static function ($profile): void {
+                                $profile->where('is_hidden', false);
+                            });
+                    });
             })
             ->with([
                 'maker' => static function ($makerQuery): void {
                     $makerQuery
                         ->select(['id', 'name', 'role', 'status', 'created_at'])
-                        ->with(['makerProfile.location'])
+                        ->with([
+                            'makerProfile.location',
+                            'makerProfile.artworkSlots.artwork.primaryMedia',
+                        ])
                         ->withCount(['savedByAppreciators as saves_count']);
                 },
                 'type:id,name,slug,is_active',

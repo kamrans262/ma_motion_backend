@@ -14,10 +14,14 @@ final class ShowController extends Controller
     public function __invoke(User $maker, MakerManagementService $makers): View
     {
         if (! $maker->hasRole(UserRole::Maker)) {
-            throw (new ModelNotFoundException())->setModel(User::class, [$maker->getKey()]);
+            throw (new ModelNotFoundException)->setModel(User::class, [$maker->getKey()]);
         }
 
-        $maker->loadMissing('makerProfile.location');
+        $maker->loadMissing([
+            'makerProfile.location',
+            'makerProfile.contents',
+            'makerProfile.artworkSlots.artwork.primaryMedia',
+        ]);
         $maker->loadCount(['savedByAppreciators as saves_count']);
 
         return view('admin.makers.show', [

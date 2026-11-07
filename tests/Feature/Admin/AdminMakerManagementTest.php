@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Features\Artworks\Models\Artwork;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminMakerManagementTest extends TestCase
@@ -49,6 +52,112 @@ class AdminMakerManagementTest extends TestCase
         $this->assertSame(UserStatus::Inactive, $maker->status);
         $this->assertSame('New York, NY', $maker->makerProfile->location_text);
         $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_admin_can_preview_and_manage_maker_salon_image_and_canonical_artwork_slots(): void
+    {
+        Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => UserRole::Admin, 'status' => UserStatus::Active]);
+        $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+
+        $this->actingAs($admin)
+            ->post('/admin/makers/'.$maker->id.'/profile-image', [
+                'image' => UploadedFile::fake()->image('salon.jpg', 1200, 900),
+            ])
+            ->assertRedirect('/admin/makers/'.$maker->id);
+
+        $maker->refresh();
+        $this->assertNotNull($maker->makerProfile?->profile_image_path);
+        Storage::disk('public')->assertExists($maker->makerProfile->profile_image_path);
+
+        $this->actingAs($admin)
+            ->post('/admin/makers/'.$maker->id.'/content/1', [
+                'caption' => 'Admin salon content',
+                'media' => UploadedFile::fake()->image('content-one.jpg'),
+            ])
+            ->assertRedirect('/admin/makers/'.$maker->id);
+
+        $content = $maker->makerProfile->contents()->where('slot', 1)->firstOrFail();
+        Storage::disk('public')->assertExists($content->path);
+
+        $artwork = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Admin managed artwork',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+        $maker->makerProfile->artworkSlots()->create([
+            'slot' => 2,
+            'artwork_id' => $artwork->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/admin/makers/'.$maker->id)
+            ->assertOk()
+            ->assertSee('Maker salon image')
+            ->assertSee('Content 1 · Salon / profile media')
+            ->assertSee('Content 2 · Artwork')
+            ->assertSee('Content 3 · Artwork')
+            ->assertSee('Content 4 · Artwork')
+            ->assertSee('Admin managed artwork')
+            ->assertSee('Manage artwork');
+
+        $this->actingAs($admin)
+            ->post('/admin/makers/'.$maker->id.'/content/2', [
+                'media' => UploadedFile::fake()->image('invalid-legacy-slot.jpg'),
+            ])
+            ->assertNotFound();
+
+        $this->actingAs($admin)
+            ->delete('/admin/makers/'.$maker->id.'/content/1')
+            ->assertRedirect('/admin/makers/'.$maker->id);
+
+        Storage::disk('public')->assertMissing($content->path);
+        $this->assertDatabaseMissing('maker_profile_contents', ['id' => $content->id]);
+        $this->assertDatabaseHas('artworks', ['id' => $artwork->id]);
+        $this->assertDatabaseHas('maker_profile_artwork_slots', [
+            'maker_profile_id' => $maker->makerProfile->id,
+            'slot' => 2,
+            'artwork_id' => $artwork->id,
+        ]);
+
+        $profileImagePath = $maker->refresh()->makerProfile->profile_image_path;
+
+        $this->actingAs($admin)
+            ->delete('/admin/makers/'.$maker->id.'/profile-image')
+            ->assertRedirect('/admin/makers/'.$maker->id);
+
+        Storage::disk('public')->assertMissing($profileImagePath);
+        $this->assertNull($maker->refresh()->makerProfile->profile_image_path);
+    }
+
+    public function test_admin_can_manage_maker_visibility_settings(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin, 'status' => UserStatus::Active]);
+        $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+
+        $this->actingAs($admin)
+            ->put('/admin/makers/'.$maker->id, [
+                'name' => $maker->name,
+                'email' => $maker->email,
+                'status' => UserStatus::Active->value,
+                'website_url' => 'https://artist.example',
+                'contact_email' => 'contact@artist.example',
+                'show_website_on_info_page' => 0,
+                'show_email_on_info_page' => 1,
+                'show_shows_on_info_page' => 0,
+            ])
+            ->assertRedirect('/admin/makers/'.$maker->id);
+
+        $profile = $maker->refresh()->makerProfile;
+
+        $this->assertFalse($profile->show_website_on_info_page);
+        $this->assertTrue($profile->show_email_on_info_page);
+        $this->assertFalse($profile->show_shows_on_info_page);
+        $this->assertSame('https://artist.example', $profile->website_url);
+        $this->assertSame('contact@artist.example', $profile->contact_email);
     }
 
     public function test_non_maker_cannot_be_opened_as_maker(): void

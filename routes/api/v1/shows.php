@@ -1,6 +1,7 @@
 <?php
 
 use App\Features\Shows\Http\Controllers\Api\V1\DestroyController;
+use App\Features\Shows\Http\Controllers\Api\V1\EventLocationSuggestionsController;
 use App\Features\Shows\Http\Controllers\Api\V1\IndexController;
 use App\Features\Shows\Http\Controllers\Api\V1\PublicIndexController;
 use App\Features\Shows\Http\Controllers\Api\V1\PublicShowController;
@@ -21,6 +22,9 @@ Route::middleware(['auth:sanctum', 'account.active', 'role:maker'])
     ->name('me.shows.')
     ->group(function (): void {
         Route::get('/', IndexController::class)->name('index');
+        Route::get('/event-location-suggestions', EventLocationSuggestionsController::class)
+            ->middleware('throttle:30,1')
+            ->name('event-location-suggestions');
         Route::post('/', StoreController::class)->name('store');
         Route::get('/{show}', ShowController::class)->whereNumber('show')->name('show');
         Route::patch('/{show}', UpdateController::class)->whereNumber('show')->name('update');

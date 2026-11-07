@@ -12,7 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 final class PublicShowService
 {
     /**
-     * @param array{status?:string|null,per_page?:int|null} $filters
+     * @param  array{status?:string|null,per_page?:int|null}  $filters
      * @return LengthAwarePaginator<int, Show>
      */
     public function paginateForMaker(int $makerId, array $filters): LengthAwarePaginator
@@ -45,6 +45,20 @@ final class PublicShowService
         return User::query()
             ->where('role', UserRole::Maker->value)
             ->where('status', UserStatus::Active->value)
+            ->where(static function ($visibility): void {
+                $visibility
+                    ->whereDoesntHave('makerProfile')
+                    ->orWhereHas('makerProfile', static function ($profileQuery): void {
+                        $profileQuery->where('is_hidden', false);
+                    });
+            })
+            ->where(static function ($query): void {
+                $query
+                    ->whereDoesntHave('makerProfile')
+                    ->orWhereHas('makerProfile', static function ($profileQuery): void {
+                        $profileQuery->where('show_shows_on_info_page', true);
+                    });
+            })
             ->findOrFail($makerId);
     }
 

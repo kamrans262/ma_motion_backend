@@ -12,7 +12,7 @@ final class DeleteAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'current_password' => ['required', 'string', 'max:255'],
+            'current_password' => [Rule::requiredIf(fn (): bool => $this->user()?->password !== null), 'nullable', 'string', 'max:255'],
             'confirmation' => ['required', 'string', Rule::in(['DELETE'])],
         ];
     }

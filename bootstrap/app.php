@@ -1,6 +1,7 @@
 <?php
 
 use App\Features\Admin\Http\Middleware\EnsureAdminPanelAccess;
+use App\Features\Auth\Exceptions\AccountAlreadyExistsException;
 use App\Features\Auth\Exceptions\InactiveAccountException;
 use App\Features\Auth\Exceptions\InvalidCredentialsException;
 use App\Features\Auth\Exceptions\InvalidSocialIdentityException;
@@ -72,6 +73,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (InactiveAccountException $exception, Request $request) use ($isApiRequest) {
             if (! $isApiRequest($request)) return null;
             return ApiResponse::error(message: $exception->getMessage(), status: 403);
+        });
+
+        $exceptions->render(function (AccountAlreadyExistsException $exception, Request $request) use ($isApiRequest) {
+            if (! $isApiRequest($request)) return null;
+
+            return ApiResponse::error(
+                message: $exception->getMessage(),
+                status: 409,
+                errors: ['email' => [$exception->getMessage()]],
+                code: AccountAlreadyExistsException::CODE,
+            );
         });
 
         $exceptions->render(function (AuthenticationException $exception, Request $request) use ($isApiRequest) {

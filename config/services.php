@@ -29,6 +29,8 @@ return [
     ],
 
     // Credentials JSON stays outside public/ and is never committed to Git.
+    'google_places' => ['api_key' => env('GOOGLE_PLACES_API_KEY')],
+
     'ma_fcm' => [
         'enabled' => env('MA_FCM_ENABLED', false),
         'project_id' => env('MA_FCM_PROJECT_ID'),

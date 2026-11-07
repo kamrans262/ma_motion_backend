@@ -17,7 +17,14 @@ final class FeaturedMakerService
             ->whereNotNull('maker_id')
             ->whereHas('maker', static function ($query): void {
                 $query->where('role', UserRole::Maker->value)
-                    ->where('status', UserStatus::Active->value);
+                    ->where('status', UserStatus::Active->value)
+                    ->where(static function ($visibility): void {
+                        $visibility
+                            ->whereDoesntHave('makerProfile')
+                            ->orWhereHas('makerProfile', static function ($profile): void {
+                                $profile->where('is_hidden', false);
+                            });
+                    });
             })
             ->first();
 
