@@ -37,7 +37,7 @@ class MakerArtworkApiTest extends TestCase
         $this->withToken($token)->getJson('/api/v1/me/artworks')->assertOk()->assertJsonPath('meta.total',1)->assertJsonPath('data.0.id',$id);
 
         Artwork::query()->whereKey($id)->update(['moderation_status'=>ArtworkModerationStatus::Approved->value]);
-        $this->withToken($token)->patchJson('/api/v1/me/artworks/'.$id, ['title'=>'Updated Work'])->assertOk()->assertJsonPath('data.title','Updated Work')->assertJsonPath('data.moderation_status','pending');
+        $this->withToken($token)->patchJson('/api/v1/me/artworks/'.$id, ['title'=>'Updated Work'])->assertOk()->assertJsonPath('data.title','Updated Work')->assertJsonPath('data.moderation_status','approved');
 
         $this->withToken($token)->deleteJson('/api/v1/me/artworks/'.$id)->assertOk();
         $this->assertSoftDeleted('artworks', ['id'=>$id]);

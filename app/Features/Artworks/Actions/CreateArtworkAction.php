@@ -2,7 +2,7 @@
 
 namespace App\Features\Artworks\Actions;
 
-use App\Features\Artworks\Enums\ArtworkModerationStatus;
+use App\Features\Artworks\Services\MakerArtworkApprovalService;
 use App\Features\Artworks\Models\Artwork;
 use App\Features\Artworks\Services\ArtworkMediaStorageService;
 use App\Features\Artworks\Support\ArtworkData;
@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 final class CreateArtworkAction
 {
-    public function __construct(private readonly ArtworkMediaStorageService $mediaStorage) {}
+    public function __construct(
+        private readonly ArtworkMediaStorageService $mediaStorage,
+        private readonly MakerArtworkApprovalService $approval,
+    ) {}
 
     /**
      * @param array<string, mixed> $data
@@ -22,7 +25,7 @@ final class CreateArtworkAction
     {
         return DB::transaction(function () use ($maker, $data, $files): Artwork {
             $artwork = $maker->artworks()->create(ArtworkData::normalize($data) + [
-                'moderation_status' => ArtworkModerationStatus::Pending->value,
+                'moderation_status' => $this->approval->statusForNewArtwork($maker)->value,
                 'is_visible' => true,
             ]);
 

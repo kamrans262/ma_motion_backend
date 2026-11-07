@@ -4,6 +4,7 @@ namespace App\Features\Admin\Artworks\Actions;
 
 use App\Features\Artworks\Enums\ArtworkModerationStatus;
 use App\Features\Artworks\Models\Artwork;
+use Illuminate\Support\Facades\DB;
 
 final class ModerateArtworkAction
 {
@@ -15,11 +16,24 @@ final class ModerateArtworkAction
             ? trim((string) ($data['rejection_reason'] ?? ''))
             : null;
 
-        $artwork->forceFill([
-            'moderation_status' => $status,
-            'rejection_reason' => $reason === '' ? null : $reason,
-        ])->save();
+        return DB::transaction(function () use ($artwork, $status, $reason): Artwork {
+            $artwork->forceFill([
+                'moderation_status' => $status,
+                'rejection_reason' => $reason === '' ? null : $reason,
+            ])->save();
 
-        return $artwork->fresh(['maker.makerProfile', 'type', 'style', 'location', 'media']);
+            if ($status === ArtworkModerationStatus::Approved) {
+                // Approval is granted to the Maker once, and survives removal
+                // or subsequent moderation of their first approved artwork.
+                $profile = $artwork->maker->makerProfile()->firstOrCreate([
+                    'user_id' => $artwork->maker_id,
+                ]);
+                if ($profile->artwork_approval_granted_at === null) {
+                    $profile->forceFill(['artwork_approval_granted_at' => now()])->save();
+                }
+            }
+
+            return $artwork->fresh(['maker.makerProfile', 'type', 'style', 'location', 'media']);
+        });
     }
 }

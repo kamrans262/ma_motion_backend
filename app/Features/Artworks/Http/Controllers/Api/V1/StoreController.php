@@ -11,6 +11,6 @@ final class StoreController extends Controller
     public function __invoke(StoreArtworkRequest $request, CreateArtworkAction $action): JsonResponse
     {
         $artwork = $action->execute($request->user(), $request->safe()->except('media'), $request->file('media', []));
-        return ApiResponse::success(data: ArtworkResource::make($artwork)->resolve($request), message: 'Artwork uploaded successfully and is pending review.', status: 201);
+        return ApiResponse::success(data: ArtworkResource::make($artwork)->resolve($request), message: $artwork->moderation_status->value === 'pending' ? 'Artwork uploaded successfully and is pending review.' : 'Artwork uploaded successfully.', status: 201);
     }
 }

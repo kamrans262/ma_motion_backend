@@ -29,6 +29,7 @@ class AdminArtworkManagementTest extends TestCase
         $artwork->refresh();
         $this->assertSame('Blue Study Updated',$artwork->title);
         $this->assertSame('approved',$artwork->moderation_status->value);
+        $this->assertNotNull($maker->refresh()->makerProfile?->artwork_approval_granted_at);
         $this->assertFalse($artwork->is_visible);
         $this->assertSame($type->id,$artwork->artwork_type_id);
 

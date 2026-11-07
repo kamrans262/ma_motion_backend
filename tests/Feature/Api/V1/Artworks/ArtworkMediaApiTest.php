@@ -25,7 +25,7 @@ class ArtworkMediaApiTest extends TestCase
         $id=(int)$created->json('data.id');
         Artwork::query()->whereKey($id)->update(['moderation_status'=>ArtworkModerationStatus::Approved->value]);
 
-        $added=$this->withToken($token)->post('/api/v1/me/artworks/'.$id.'/media',['media'=>[UploadedFile::fake()->image('two.png',900,700)]])->assertCreated()->assertJsonPath('data.moderation_status','pending')->assertJsonCount(2,'data.media');
+        $added=$this->withToken($token)->post('/api/v1/me/artworks/'.$id.'/media',['media'=>[UploadedFile::fake()->image('two.png',900,700)]])->assertCreated()->assertJsonPath('data.moderation_status','approved')->assertJsonCount(2,'data.media');
         $secondId=(int)$added->json('data.media.1.id');
         $this->withToken($token)->patchJson('/api/v1/me/artworks/'.$id.'/media/'.$secondId.'/primary')->assertOk()->assertJsonPath('data.media.1.is_primary',true);
         $firstId=(int)$added->json('data.media.0.id');
