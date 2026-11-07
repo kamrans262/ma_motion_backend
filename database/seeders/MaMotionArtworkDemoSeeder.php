@@ -206,6 +206,9 @@ final class MaMotionArtworkDemoSeeder extends Seeder
             $created++;
         }
 
+        // Add upcoming demo exhibitions so the current Discovery orange-dot indicator is visible.
+        $this->call(MaMotionUpcomingShowDemoSeeder::class);
+
         $this->command?->info('Demo artworks: '.$created.' created, '.$reused.' reused, '.$broken->count().' fully broken artworks archived, '.$partial->count().' incomplete artworks repaired, '.$missingProfileImages.' missing Maker profile images cleared.');
         if ($archivePath !== null) {
             $this->command?->info('Archived original metadata: storage/app/private/'.$archivePath);
