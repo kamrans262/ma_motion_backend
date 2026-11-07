@@ -18,6 +18,7 @@ final class MaMotionArtworkDemoSeederTest extends TestCase
     public function test_demo_seeding_preserves_users_archives_missing_artworks_and_generates_real_png_files(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
         $appreciator = User::factory()->create(['role' => UserRole::Appreciator, 'status' => UserStatus::Active]);
         $broken = Artwork::query()->create([
@@ -46,6 +47,7 @@ final class MaMotionArtworkDemoSeederTest extends TestCase
         $this->assertSame(800, $dimensions[1]);
         $this->assertNotEmpty($artwork->description);
         $this->assertNotNull($maker->refresh()->makerProfile?->artwork_approval_granted_at);
+        $this->assertSame(3, $maker->makerProfile->artworkSlots()->count());
 
         $this->seed(MaMotionArtworkDemoSeeder::class);
         $this->assertSame(12, Artwork::query()->count());
@@ -55,6 +57,7 @@ final class MaMotionArtworkDemoSeederTest extends TestCase
     public function test_existing_valid_artwork_is_preserved(): void
     {
         Storage::fake('public');
+        Storage::fake('local');
         $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
         Storage::disk('public')->put('artworks/keep.jpg', 'not empty');
         $original = Artwork::query()->create([

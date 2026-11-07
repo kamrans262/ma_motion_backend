@@ -80,6 +80,7 @@ final class MaMotionArtworkDemoSeeder extends Seeder
 
         // Preserve already seeded demo artworks and their IDs on reruns.
         $existingDemo = Artwork::query()
+            ->with('primaryMedia')
             ->whereHas('media', static function ($query): void {
                 $query->where('path', 'like', self::PREFIX.'%');
             })
@@ -134,6 +135,7 @@ final class MaMotionArtworkDemoSeeder extends Seeder
         foreach (self::PIECES as $index => [$title, $description, $typeSlug, $styleSlug]) {
             $path = $this->pathFor($index, $title);
             if ($existingDemo->has($path)) {
+                $this->fillBrokenOrEmptyMakerInfoSlot($existingDemo->get($path));
                 $reused++;
                 continue;
             }
@@ -141,7 +143,7 @@ final class MaMotionArtworkDemoSeeder extends Seeder
             $maker = $makers[$index % $makers->count()];
             $profile = $maker->makerProfile()->firstOrCreate(['user_id' => $maker->id]);
 
-            DB::transaction(function () use ($maker, $profile, $title, $description, $typeSlug, $styleSlug, $path, $index, $disk): void {
+            $artwork = DB::transaction(function () use ($maker, $profile, $title, $description, $typeSlug, $styleSlug, $path, $index, $disk): Artwork {
                 $artwork = Artwork::query()->create([
                     'maker_id' => $maker->id,
                     'title' => $title,
@@ -173,7 +175,10 @@ final class MaMotionArtworkDemoSeeder extends Seeder
                 if ($profile->artwork_approval_granted_at === null) {
                     $profile->forceFill(['artwork_approval_granted_at' => now()])->save();
                 }
+
+                return $artwork;
             });
+            $this->fillBrokenOrEmptyMakerInfoSlot($artwork);
             $created++;
         }
 
@@ -182,6 +187,46 @@ final class MaMotionArtworkDemoSeeder extends Seeder
             $this->command?->info('Archived original metadata: storage/app/private/'.$archivePath);
         }
         $this->command?->info('All users and healthy artwork records were preserved. Artwork files: storage/app/public/'.self::PREFIX);
+    }
+
+    /**
+     * Fill Maker Info slots 2–4 with usable demo artwork.
+     * Existing user-selected slots with working images are never replaced.
+     */
+    private function fillBrokenOrEmptyMakerInfoSlot(Artwork $demo): void
+    {
+        $profile = $demo->maker->makerProfile;
+        if ($profile === null) {
+            return;
+        }
+
+        if ($profile->artworkSlots()->where('artwork_id', $demo->id)->exists()) {
+            return;
+        }
+
+        foreach ([2, 3, 4] as $slot) {
+            $assignment = $profile->artworkSlots()
+                ->with('artwork.media')
+                ->where('slot', $slot)
+                ->first();
+
+            if ($assignment !== null && $assignment->artwork !== null
+                && $assignment->artwork->media->contains(static function ($media): bool {
+                    try {
+                        return Storage::disk($media->disk)->exists($media->path);
+                    } catch (\Throwable) {
+                        return true;
+                    }
+                })) {
+                continue;
+            }
+
+            $profile->artworkSlots()->updateOrCreate(
+                ['slot' => $slot],
+                ['artwork_id' => $demo->id],
+            );
+            return;
+        }
     }
 
     private function pathFor(int $index, string $title): string
