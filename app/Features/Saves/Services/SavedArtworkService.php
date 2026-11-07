@@ -43,7 +43,12 @@ final class SavedArtworkService
                     $maker
                         ->select(['id', 'name', 'role', 'status', 'created_at'])
                         ->with(['makerProfile.location'])
-                        ->withCount(['savedByAppreciators as saves_count']);
+                        ->withCount(['savedByAppreciators as saves_count'])
+                        ->withExists([
+                            'shows as has_visible_current_or_upcoming_show' => static function (Builder $shows): void {
+                                $shows->where('is_visible', true)->currentOrUpcoming();
+                            },
+                        ]);
                 },
                 'artwork.type:id,name,slug,is_active',
                 'artwork.style:id,name,slug,is_active',

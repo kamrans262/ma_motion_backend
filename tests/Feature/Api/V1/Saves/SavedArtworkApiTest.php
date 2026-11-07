@@ -58,6 +58,36 @@ final class SavedArtworkApiTest extends TestCase
         ]);
     }
 
+    public function test_saved_artwork_exposes_public_maker_show_indicator(): void
+    {
+        $viewer = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $artwork = $this->publicArtwork();
+        $artist = $artwork->maker;
+        $artist->makerProfile()->create([
+            'show_shows_on_info_page' => true,
+            'current_upcoming_shows' => [
+                ['description' => 'Upcoming solo show', 'location' => ''],
+            ],
+        ]);
+        $token = $viewer->createToken('mobile', ['mobile'])->plainTextToken;
+        $this->withToken($token)
+            ->postJson('/api/v1/me/saved-artworks/'.$artwork->id)
+            ->assertOk();
+        $this->withToken($token)
+            ->getJson('/api/v1/me/saved-artworks')
+            ->assertOk()
+            ->assertJsonPath('data.0.maker.has_current_or_upcoming_show', true);
+
+        $artist->makerProfile->update(['show_shows_on_info_page' => false]);
+        $this->withToken($token)
+            ->getJson('/api/v1/me/saved-artworks')
+            ->assertOk()
+            ->assertJsonPath('data.0.maker.has_current_or_upcoming_show', false);
+    }
+
     public function test_appreciator_can_save_artwork_without_changing_saved_maker_rules(): void
     {
         $appreciator = User::factory()->create([

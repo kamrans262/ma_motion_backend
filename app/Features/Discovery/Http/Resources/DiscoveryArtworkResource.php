@@ -15,6 +15,14 @@ final class DiscoveryArtworkResource extends JsonResource
         $makerProfile = $this->maker?->makerProfile;
         $effectiveLocation = $this->location ?: $makerProfile?->location;
         $primaryMedia = $this->primaryMedia;
+        $profileShows = $makerProfile?->current_upcoming_shows ?? [];
+        $hasProfileShows = is_array($profileShows) && collect($profileShows)
+            ->contains(static fn ($show): bool => is_array($show)
+                && (trim((string) ($show['description'] ?? '')) !== ''
+                    || trim((string) ($show['location'] ?? '')) !== ''));
+        // Respect the Maker's public show-visibility setting.
+        $hasPublicShow = ($makerProfile?->show_shows_on_info_page ?? true)
+            && ($hasProfileShows || (bool) $this->maker?->getAttribute('has_visible_current_or_upcoming_show'));
 
         return [
             'id' => $this->id,
@@ -54,6 +62,7 @@ final class DiscoveryArtworkResource extends JsonResource
                     ? Storage::disk('public')->url($makerProfile->profile_image_path)
                     : null,
                 'saved_count' => (int) ($this->maker->saves_count ?? 0),
+                'has_current_or_upcoming_show' => $hasPublicShow,
             ] : null,
             'created_at' => $this->created_at?->toISOString(),
         ];
