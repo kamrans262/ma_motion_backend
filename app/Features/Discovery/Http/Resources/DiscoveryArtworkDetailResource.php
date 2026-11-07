@@ -6,7 +6,7 @@ use App\Features\Artworks\Enums\ArtworkModerationStatus;
 use App\Features\Artworks\Http\Resources\ArtworkMediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
+use App\Support\Media\PublicMediaUrl;
 
 final class DiscoveryArtworkDetailResource extends JsonResource
 {
@@ -82,9 +82,7 @@ final class DiscoveryArtworkDetailResource extends JsonResource
                 'name' => $this->maker->name,
                 'bio' => $makerProfile?->bio,
                 'location' => $makerProfile?->location_text,
-                'profile_image_url' => $makerProfile?->profile_image_path
-                    ? Storage::disk('public')->url($makerProfile->profile_image_path)
-                    : null,
+                'profile_image_url' => PublicMediaUrl::ifExists($makerProfile?->profile_image_path),
                 'website_url' => ($makerProfile?->show_website_on_info_page ?? true)
                     ? $makerProfile?->website_url
                     : null,

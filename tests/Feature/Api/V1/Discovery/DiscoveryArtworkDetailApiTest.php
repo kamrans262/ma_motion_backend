@@ -132,6 +132,41 @@ final class DiscoveryArtworkDetailApiTest extends TestCase
             ->assertJsonMissing(['contact_email' => 'private@example.com']);
     }
 
+    public function test_missing_maker_profile_image_does_not_create_an_empty_salon_slide(): void
+    {
+        Storage::fake('public');
+
+        $maker = User::factory()->create([
+            'role' => UserRole::Maker,
+            'status' => UserStatus::Active,
+        ]);
+        $maker->makerProfile()->create([
+            'profile_image_path' => 'maker-profiles/old-missing-salon.jpg',
+        ]);
+        $artwork = Artwork::query()->create([
+            'maker_id' => $maker->id,
+            'title' => 'Working artwork',
+            'moderation_status' => 'approved',
+            'is_visible' => true,
+        ]);
+
+        $this->getJson('/api/v1/discovery/artworks/'.$artwork->id)
+            ->assertOk()
+            ->assertJsonPath('data.maker.profile_image_url', null);
+
+        Storage::disk('public')->put('maker-profiles/working-salon.jpg', 'image-data');
+        $maker->makerProfile->forceFill([
+            'profile_image_path' => 'maker-profiles/working-salon.jpg',
+        ])->save();
+
+        $this->getJson('/api/v1/discovery/artworks/'.$artwork->id)
+            ->assertOk()
+            ->assertJsonPath(
+                'data.maker.profile_image_url',
+                Storage::disk('public')->url('maker-profiles/working-salon.jpg'),
+            );
+    }
+
     public function test_hidden_maker_artwork_is_not_publicly_exposed(): void
     {
         $maker = User::factory()->create([

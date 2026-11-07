@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Features\Artworks\Models\Artwork;
+use App\Features\Makers\Models\MakerProfile;
+use App\Features\Makers\Models\MakerProfileContent;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Taxonomy\Models\ArtworkStyle;
@@ -59,6 +61,7 @@ final class MaMotionArtworkDemoSeeder extends Seeder
         }
 
         $this->call(MaMotionTaxonomySeeder::class);
+        $missingProfileImages = $this->clearMissingMakerProfileImages();
 
         $disk = Storage::disk('public');
         $renderer = new DemoArtworkPng();
@@ -203,11 +206,69 @@ final class MaMotionArtworkDemoSeeder extends Seeder
             $created++;
         }
 
-        $this->command?->info('Demo artworks: '.$created.' created, '.$reused.' reused, '.$broken->count().' fully broken artworks archived, '.$partial->count().' incomplete artworks repaired.');
+        $this->command?->info('Demo artworks: '.$created.' created, '.$reused.' reused, '.$broken->count().' fully broken artworks archived, '.$partial->count().' incomplete artworks repaired, '.$missingProfileImages.' missing Maker profile images cleared.');
         if ($archivePath !== null) {
             $this->command?->info('Archived original metadata: storage/app/private/'.$archivePath);
         }
         $this->command?->info('All users and healthy artwork records were preserved. Artwork files: storage/app/public/'.self::PREFIX);
+    }
+
+    /**
+     * Remove only missing profile-image and slot-1 media references, never
+     * Maker accounts or actual files. Save a private recovery manifest first.
+     */
+    private function clearMissingMakerProfileImages(): int
+    {
+        $disk = Storage::disk('public');
+
+        $profiles = MakerProfile::query()
+            ->whereNotNull('profile_image_path')
+            ->get()
+            ->filter(static fn (MakerProfile $profile): bool =>
+                trim((string) $profile->profile_image_path) !== ''
+                && ! $disk->exists($profile->profile_image_path)
+            );
+
+        $contents = MakerProfileContent::query()
+            ->where('slot', 1)
+            ->get()
+            ->filter(static fn (MakerProfileContent $content): bool =>
+                trim((string) $content->path) === ''
+                || ! $disk->exists($content->path)
+            );
+
+        if ($profiles->isEmpty() && $contents->isEmpty()) {
+            return 0;
+        }
+
+        $manifest = [
+            'profile_image_references' => $profiles->map(static fn ($item) => [
+                'maker_profile_id' => $item->id,
+                'user_id' => $item->user_id,
+                'old_path' => $item->profile_image_path,
+            ])->values()->all(),
+            'maker_content_references' => $contents->map->getAttributes()->all(),
+        ];
+
+        $path = 'backups/ma-motion-missing-maker-media-'.now()->format('Ymd-His').'-'.Str::random(6).'.json';
+        if (Storage::disk('local')->put($path, json_encode($manifest, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)) !== true) {
+            throw new RuntimeException('Could not back up missing Maker media references; nothing was changed.');
+        }
+
+        DB::transaction(function () use ($profiles, $contents): void {
+            foreach ($profiles as $profile) {
+                $profile->forceFill(['profile_image_path' => null])->save();
+            }
+
+            foreach ($contents as $content) {
+                // The file is already absent; remove only the stale record.
+                $content->delete();
+            }
+        });
+
+        $this->command?->info('Missing Maker image references backed up to storage/app/private/'.$path);
+
+        return $profiles->count();
     }
 
     /** Return false when the disk is unknown, to avoid removing remote media. */

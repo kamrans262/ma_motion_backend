@@ -5,7 +5,7 @@ namespace App\Features\Discovery\Http\Resources;
 use App\Features\Artworks\Http\Resources\ArtworkMediaResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
+use App\Support\Media\PublicMediaUrl;
 
 final class DiscoveryArtworkResource extends JsonResource
 {
@@ -58,9 +58,7 @@ final class DiscoveryArtworkResource extends JsonResource
                 'id' => $this->maker->id,
                 'name' => $this->maker->name,
                 'bio' => $makerProfile?->bio,
-                'profile_image_url' => $makerProfile?->profile_image_path
-                    ? Storage::disk('public')->url($makerProfile->profile_image_path)
-                    : null,
+                'profile_image_url' => PublicMediaUrl::ifExists($makerProfile?->profile_image_path),
                 'saved_count' => (int) ($this->maker->saves_count ?? 0),
                 'has_current_or_upcoming_show' => $hasPublicShow,
             ] : null,

@@ -4,7 +4,7 @@ namespace App\Features\Discovery\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
+use App\Support\Media\PublicMediaUrl;
 
 final class DiscoveryMakerResource extends JsonResource
 {
@@ -18,9 +18,7 @@ final class DiscoveryMakerResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'bio' => $profile?->bio,
-            'profile_image_url' => $profile?->profile_image_path
-                ? Storage::disk('public')->url($profile->profile_image_path)
-                : null,
+            'profile_image_url' => PublicMediaUrl::ifExists($profile?->profile_image_path),
             'location' => $location ? [
                 'id' => $location->id,
                 'label' => $location->displayLabel(),

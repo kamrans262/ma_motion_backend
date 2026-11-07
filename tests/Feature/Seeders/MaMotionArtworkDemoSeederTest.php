@@ -54,6 +54,30 @@ final class MaMotionArtworkDemoSeederTest extends TestCase
         $this->assertSame(2, User::query()->count());
     }
 
+    public function test_missing_maker_profile_and_content_paths_are_cleaned_without_deleting_account(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+
+        $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        $profile = $maker->makerProfile()->create([
+            'profile_image_path' => 'maker-profiles/no-longer-here.jpg',
+        ]);
+        $profile->contents()->create([
+            'slot' => 1,
+            'kind' => 'image',
+            'path' => 'maker-profiles/missing-content.jpg',
+            'mime_type' => 'image/jpeg',
+        ]);
+
+        $this->seed(MaMotionArtworkDemoSeeder::class);
+
+        $this->assertNull($profile->refresh()->profile_image_path);
+        $this->assertSame(0, $profile->contents()->count());
+        $this->assertTrue(User::query()->whereKey($maker->id)->exists());
+        $this->assertNotEmpty(Storage::disk('local')->allFiles('backups'));
+    }
+
     public function test_partial_missing_media_is_removed_from_detail_without_losing_existing_work(): void
     {
         Storage::fake('public');

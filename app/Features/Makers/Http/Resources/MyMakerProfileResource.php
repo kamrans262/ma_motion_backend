@@ -4,7 +4,7 @@ namespace App\Features\Makers\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
+use App\Support\Media\PublicMediaUrl;
 
 final class MyMakerProfileResource extends JsonResource
 {
@@ -47,9 +47,7 @@ final class MyMakerProfileResource extends JsonResource
             'artwork_slots' => $profile
                 ? MakerProfileArtworkSlotResource::collection($profile->artworkSlots)->resolve($request)
                 : [],
-            'profile_image_url' => $profile?->profile_image_path
-                ? Storage::disk('public')->url($profile->profile_image_path)
-                : null,
+            'profile_image_url' => PublicMediaUrl::ifExists($profile?->profile_image_path),
             'types' => $types->map(static fn ($type): array => [
                 'id' => $type->id,
                 'name' => $type->name,
