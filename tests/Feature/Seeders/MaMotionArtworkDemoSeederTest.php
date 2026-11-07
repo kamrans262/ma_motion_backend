@@ -54,6 +54,36 @@ final class MaMotionArtworkDemoSeederTest extends TestCase
         $this->assertSame(2, User::query()->count());
     }
 
+    public function test_partial_missing_media_is_removed_from_detail_without_losing_existing_work(): void
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        $artwork = Artwork::query()->create([
+            'maker_id' => $maker->id, 'title' => 'Artwork with a broken main image',
+            'moderation_status' => 'approved', 'is_visible' => true,
+        ]);
+        $artwork->media()->create([
+            'kind' => 'image', 'disk' => 'public', 'path' => 'artworks/old-empty.jpg',
+            'mime_type' => 'image/jpeg', 'size_bytes' => 50,
+            'sort_order' => 0, 'is_primary' => true,
+        ]);
+        Storage::disk('public')->put('artworks/working-image.jpg', 'real file');
+        $working = $artwork->media()->create([
+            'kind' => 'image', 'disk' => 'public', 'path' => 'artworks/working-image.jpg',
+            'mime_type' => 'image/jpeg', 'size_bytes' => 9,
+            'sort_order' => 1, 'is_primary' => false,
+        ]);
+
+        $this->seed(MaMotionArtworkDemoSeeder::class);
+
+        $this->assertDatabaseHas('artworks', ['id' => $artwork->id, 'deleted_at' => null]);
+        $this->assertDatabaseMissing('artwork_media', ['path' => 'artworks/old-empty.jpg']);
+        $this->assertSame($working->id, $artwork->refresh()->primaryMedia?->id);
+        Storage::disk('public')->assertExists('artworks/working-image.jpg');
+        $this->assertNotEmpty(Storage::disk('local')->allFiles('backups'));
+    }
+
     public function test_existing_valid_artwork_is_preserved(): void
     {
         Storage::fake('public');

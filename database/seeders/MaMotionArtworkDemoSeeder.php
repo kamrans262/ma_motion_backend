@@ -89,30 +89,35 @@ final class MaMotionArtworkDemoSeeder extends Seeder
                 return (string) $artwork->primaryMedia?->path;
             });
 
-        // Archive only artwork that has no usable media on any disk.
-        // Healthy user uploads are never removed or overwritten.
-        $broken = Artwork::query()
+        // Mixed-media records can still contain dead images even if one
+        // image works. Repair those records as well as completely broken works.
+        // Never delete a file from disk or modify a healthy upload.
+        $legacy = Artwork::query()
             ->with('media')
             ->whereDoesntHave('media', static function ($query): void {
                 $query->where('path', 'like', self::PREFIX.'%');
             })
-            ->get()
-            ->filter(function (Artwork $artwork): bool {
-                return $artwork->media->isEmpty()
-                    || $artwork->media->every(static function ($media): bool {
-                        try {
-                            return ! Storage::disk($media->disk)->exists($media->path);
-                        } catch (\Throwable) {
-                            // Unknown external disks are not treated as broken.
-                            return false;
-                        }
-                    });
-            });
+            ->get();
+
+        $broken = collect();
+        $partial = collect();
+
+        foreach ($legacy as $artwork) {
+            $missing = $artwork->media->filter(fn ($media): bool => $this->fileIsMissing($media));
+            if ($artwork->media->isEmpty() || $missing->count() === $artwork->media->count()) {
+                $broken->push($artwork);
+            } elseif ($missing->isNotEmpty()) {
+                $partial->push(['artwork' => $artwork, 'missing' => $missing]);
+            } elseif (! $artwork->media->contains('is_primary', true)) {
+                // Old imports can have files but no primary flag.
+                $partial->push(['artwork' => $artwork, 'missing' => collect()]);
+            }
+        }
 
         $archivePath = null;
-        if ($broken->isNotEmpty()) {
-            $archivePath = 'backups/ma-motion-broken-artworks-'.now()->format('Ymd-His').'.json';
-            $snapshot = $broken->map(static function (Artwork $artwork): array {
+        if ($broken->isNotEmpty() || $partial->isNotEmpty()) {
+            $archivePath = 'backups/ma-motion-broken-artworks-'.now()->format('Ymd-His').'-'.Str::random(6).'.json';
+            $snapshot = $broken->concat($partial->pluck('artwork'))->map(static function (Artwork $artwork): array {
                 return [
                     'artwork' => $artwork->getAttributes(),
                     'media' => $artwork->media->map->getAttributes()->all(),
@@ -123,13 +128,29 @@ final class MaMotionArtworkDemoSeeder extends Seeder
             })->all();
 
             if (Storage::disk('local')->put($archivePath, json_encode($snapshot, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR)) !== true) {
-                throw new RuntimeException('Could not save backup manifest; no existing artwork was archived.');
+                throw new RuntimeException('Could not save backup manifest; existing artwork was not changed.');
             }
 
-            // Soft-delete: metadata, saved relations and user accounts remain intact.
-            foreach ($broken as $artwork) {
-                $artwork->delete();
-            }
+            DB::transaction(function () use ($broken, $partial): void {
+                foreach ($broken as $artwork) {
+                    // Avoid broken Maker Info slots pointing to archived artworks.
+                    DB::table('maker_profile_artwork_slots')->where('artwork_id', $artwork->id)->delete();
+                    $artwork->delete();
+                }
+
+                foreach ($partial as $entry) {
+                    $artwork = $entry['artwork'];
+                    $missing = $entry['missing'];
+                    if ($missing->isNotEmpty()) {
+                        // Remove only missing DB references; keep actual media files.
+                        $artwork->media()->whereIn('id', $missing->pluck('id')->all())->delete();
+                    }
+                    $usable = $artwork->media()->orderBy('sort_order')->orderBy('id')->get();
+                    if (! $usable->contains('is_primary', true) && $usable->isNotEmpty()) {
+                        $usable->first()->forceFill(['is_primary' => true])->save();
+                    }
+                }
+            });
         }
 
         foreach (self::PIECES as $index => [$title, $description, $typeSlug, $styleSlug]) {
@@ -182,11 +203,21 @@ final class MaMotionArtworkDemoSeeder extends Seeder
             $created++;
         }
 
-        $this->command?->info('Demo artworks: '.$created.' created, '.$reused.' reused, '.$broken->count().' broken artworks safely archived.');
+        $this->command?->info('Demo artworks: '.$created.' created, '.$reused.' reused, '.$broken->count().' fully broken artworks archived, '.$partial->count().' incomplete artworks repaired.');
         if ($archivePath !== null) {
             $this->command?->info('Archived original metadata: storage/app/private/'.$archivePath);
         }
         $this->command?->info('All users and healthy artwork records were preserved. Artwork files: storage/app/public/'.self::PREFIX);
+    }
+
+    /** Return false when the disk is unknown, to avoid removing remote media. */
+    private function fileIsMissing($media): bool
+    {
+        try {
+            return ! Storage::disk($media->disk)->exists($media->path);
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     /**
@@ -211,13 +242,7 @@ final class MaMotionArtworkDemoSeeder extends Seeder
                 ->first();
 
             if ($assignment !== null && $assignment->artwork !== null
-                && $assignment->artwork->media->contains(static function ($media): bool {
-                    try {
-                        return Storage::disk($media->disk)->exists($media->path);
-                    } catch (\Throwable) {
-                        return true;
-                    }
-                })) {
+                && $assignment->artwork->media->contains(fn ($media): bool => ! $this->fileIsMissing($media))) {
                 continue;
             }
 
