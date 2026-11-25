@@ -13,7 +13,7 @@ final class ArtworkShowController extends Controller
 {
     public function __invoke(Request $request, int $artwork, ArtworkDetailService $artworks): JsonResponse
     {
-        $model = $artworks->findVisible($artwork);
+        $model = $artworks->findVisible($artwork, $request->user('sanctum'));
 
         return ApiResponse::success(
             data: DiscoveryArtworkDetailResource::make($model)->resolve($request),

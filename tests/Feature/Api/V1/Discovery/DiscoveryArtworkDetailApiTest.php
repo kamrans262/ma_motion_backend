@@ -198,4 +198,27 @@ final class DiscoveryArtworkDetailApiTest extends TestCase
         $this->getJson('/api/v1/discovery/artworks/'.$pending->id)->assertNotFound();
         $this->getJson('/api/v1/discovery/artworks/'.$inactiveMakerArtwork->id)->assertNotFound();
     }
+
+    public function test_owner_can_open_their_pending_artwork_but_other_users_cannot(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        $other = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        $pending = Artwork::query()->create([
+            'maker_id' => $owner->id,
+            'title' => 'Owner pending detail',
+            'moderation_status' => 'pending',
+            'is_visible' => true,
+            'sort_order' => 0,
+        ]);
+        $url = '/api/v1/discovery/artworks/'.$pending->id;
+
+        $this->getJson($url)->assertNotFound();
+        $otherToken = $other->createToken('mobile', ['mobile'])->plainTextToken;
+        $this->withToken($otherToken)->getJson($url)->assertNotFound();
+
+        $ownerToken = $owner->createToken('mobile', ['mobile'])->plainTextToken;
+        $this->withToken($ownerToken)->getJson($url)
+            ->assertOk()->assertJsonPath('data.id', $pending->id);
+    }
+
 }
