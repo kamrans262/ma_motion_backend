@@ -71,6 +71,7 @@ final class DiscoveryIndexRequest extends FormRequest
 
         return [
             'search' => ['nullable', 'string', 'max:120'],
+            'include_owned' => ['sometimes', 'boolean'],
             'type_ids' => ['nullable', 'array', 'max:20'],
             'type_ids.*' => ['integer', 'distinct', $activeType],
             'style_ids' => ['nullable', 'array', 'max:20'],

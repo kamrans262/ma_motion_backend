@@ -148,4 +148,59 @@ final class DiscoveryArtworkApiTest extends TestCase
             ->assertJsonPath('data.0.id', $artwork->id)
             ->assertJsonPath('data.0.title', 'Public Grid Work');
     }
+    public function test_authenticated_maker_can_see_their_own_pending_artwork_without_leaking_others(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        $otherMaker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        $owner->makerProfile()->create(['is_hidden' => true]);
+
+        $ownPending = Artwork::query()->create([
+            'maker_id' => $owner->id, 'title' => 'My pending piece',
+            'moderation_status' => 'pending', 'is_visible' => true, 'sort_order' => 0,
+        ]);
+        $ownHidden = Artwork::query()->create([
+            'maker_id' => $owner->id, 'title' => 'My hidden piece',
+            'moderation_status' => 'approved', 'is_visible' => false, 'sort_order' => 0,
+        ]);
+        Artwork::query()->create([
+            'maker_id' => $otherMaker->id, 'title' => 'Other pending piece',
+            'moderation_status' => 'pending', 'is_visible' => true, 'sort_order' => 0,
+        ]);
+        $public = Artwork::query()->create([
+            'maker_id' => $otherMaker->id, 'title' => 'Other approved piece',
+            'moderation_status' => 'approved', 'is_visible' => true, 'sort_order' => 0,
+        ]);
+
+        $token = $owner->createToken('mobile', ['mobile'])->plainTextToken;
+        $response = $this->withToken($token)->getJson('/api/v1/discovery/artworks?include_owned=1');
+        $response->assertOk()->assertJsonPath('meta.total', 3);
+        $ids = array_column($response->json('data'), 'id');
+        $this->assertContains($ownPending->id, $ids);
+        $this->assertContains($ownHidden->id, $ids);
+        $this->assertContains($public->id, $ids);
+        $response->assertJsonMissing(['title' => 'Other pending piece']);
+
+        // A signed-in Maker still sees only public artwork without opt-in.
+        $publicOnly = $this->withToken($token)->getJson('/api/v1/discovery/artworks');
+        $publicOnly->assertOk()->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.id', $public->id);
+    }
+
+    public function test_anonymous_and_appreciator_discovery_never_expose_pending_maker_artwork(): void
+    {
+        $maker = User::factory()->create(['role' => UserRole::Maker, 'status' => UserStatus::Active]);
+        Artwork::query()->create([
+            'maker_id' => $maker->id, 'title' => 'Private pending image',
+            'moderation_status' => 'pending', 'is_visible' => true, 'sort_order' => 0,
+        ]);
+
+        $this->getJson('/api/v1/discovery/artworks?include_owned=1')
+            ->assertOk()->assertJsonPath('meta.total', 0);
+
+        $appreciator = User::factory()->create(['role' => UserRole::Appreciator, 'status' => UserStatus::Active]);
+        $token = $appreciator->createToken('mobile', ['mobile'])->plainTextToken;
+        $this->withToken($token)->getJson('/api/v1/discovery/artworks?include_owned=1')
+            ->assertOk()->assertJsonPath('meta.total', 0);
+    }
+
 }

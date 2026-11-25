@@ -7,6 +7,7 @@ use App\Features\Artworks\Models\Artwork;
 use App\Features\Auth\Enums\UserRole;
 use App\Features\Auth\Enums\UserStatus;
 use App\Features\Discovery\Data\LocationMatch;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -21,10 +22,13 @@ final class ArtworkDiscoveryService
      * @param array<string, mixed> $filters
      * @return LengthAwarePaginator<int, Artwork>
      */
-    public function paginate(array $filters): LengthAwarePaginator
+    public function paginate(array $filters, ?User $viewer = null): LengthAwarePaginator
     {
         $locationMatch = $this->locationMatches->match($filters);
-        $query = $this->publicArtworkQuery();
+        $owner = ! empty($filters['include_owned']) && $viewer?->hasRole(UserRole::Maker) && $viewer->isActive()
+            ? $viewer
+            : null;
+        $query = $this->publicArtworkQuery($owner);
 
         $search = trim((string) ($filters['search'] ?? ''));
         if ($search !== '') {
@@ -63,22 +67,33 @@ final class ArtworkDiscoveryService
     }
 
     /** @return Builder<Artwork> */
-    private function publicArtworkQuery(): Builder
+    private function publicArtworkQuery(?User $owner = null): Builder
     {
         return Artwork::query()
-            ->where('moderation_status', ArtworkModerationStatus::Approved->value)
-            ->where('is_visible', true)
-            ->whereHas('maker', static function (Builder $makerQuery): void {
-                $makerQuery
-                    ->where('role', UserRole::Maker->value)
-                    ->where('status', UserStatus::Active->value)
-                    ->where(static function ($visibility): void {
-                        $visibility
-                            ->whereDoesntHave('makerProfile')
-                            ->orWhereHas('makerProfile', static function ($profile): void {
-                                $profile->where('is_hidden', false);
-                            });
-                    });
+            ->where(static function (Builder $visibility) use ($owner): void {
+                $visibility->where(static function (Builder $public): void {
+                    $public
+                        ->where('moderation_status', ArtworkModerationStatus::Approved->value)
+                        ->where('is_visible', true)
+                        ->whereHas('maker', static function (Builder $makerQuery): void {
+                            $makerQuery
+                                ->where('role', UserRole::Maker->value)
+                                ->where('status', UserStatus::Active->value)
+                                ->where(static function ($profileVisibility): void {
+                                    $profileVisibility
+                                        ->whereDoesntHave('makerProfile')
+                                        ->orWhereHas('makerProfile', static function ($profile): void {
+                                            $profile->where('is_hidden', false);
+                                        });
+                                });
+                        });
+                });
+
+                // Only the authenticated active Maker can see their own
+                // pending/hidden artworks. Public moderation is unchanged.
+                if ($owner !== null) {
+                    $visibility->orWhere('maker_id', $owner->id);
+                }
             })
             ->with([
                 'maker' => static function ($makerQuery): void {

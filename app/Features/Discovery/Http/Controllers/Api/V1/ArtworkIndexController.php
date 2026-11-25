@@ -13,7 +13,7 @@ final class ArtworkIndexController extends Controller
 {
     public function __invoke(DiscoveryIndexRequest $request, ArtworkDiscoveryService $discovery): JsonResponse
     {
-        $paginator = $discovery->paginate($request->validated());
+        $paginator = $discovery->paginate($request->validated(), $request->user('sanctum'));
 
         return ApiResponse::success(
             data: DiscoveryArtworkResource::collection($paginator->getCollection())->resolve($request),
